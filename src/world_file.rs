@@ -1,0 +1,54 @@
+use std::fs;
+use std::io;
+use std::io::Read;
+use std::io::Seek;
+use std::thread;
+
+use bevy::mesh::Mesh;
+use bevy::platform::collections::HashMap;
+
+use crate::base_voxel::{Chunk,BlockID,CHUNKLEN};
+use crate::v3;
+
+pub struct Manager {
+    chunk_pos: HashMap<u128,u64>,
+    world_name: String,
+    world_file: fs::File,
+    worker_thread: thread::Thread,
+}
+impl Manager {
+    pub fn open_file(&mut self, file_name: String) -> io::Result<()> {
+        self.world_name = file_name;
+        self.world_file = fs::OpenOptions::new()
+            .read(true)
+            .write(true)
+            .create(true)
+            .open(&self.world_name)?;
+        
+        return Ok(());
+    }
+    pub fn read_chunk(&mut self, index: v3::V3) -> io::Result<Option<Chunk>> {
+        let key = index.toKey();
+        match self.chunk_pos.get(&key) {
+            Some(&file_pos) => {
+                self.world_file.seek(io::SeekFrom::Start(file_pos))?;
+
+                let mut retChunk: Chunk = Chunk::default();
+                let u8_buffer = unsafe {
+                    std::slice::from_raw_parts_mut(
+                        retChunk.data.as_mut_ptr() as *mut u8,
+                        CHUNKLEN * std::mem::size_of::<u16>()
+                    )
+                };
+                self.world_file.read_exact(u8_buffer)?;
+
+                Ok(Some(retChunk))
+            }
+            None => {
+                println!("Chunk not found at index {:?}", index.toKey());
+                Ok(None)
+            }
+        }
+    }
+    // todo: write_chunk
+}
