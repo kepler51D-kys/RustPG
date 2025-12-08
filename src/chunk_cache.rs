@@ -1,5 +1,5 @@
 use crate::v3;
-use crate::base_voxel::{CHUNKLEN, CHUNKSIZE, Chunk, WORLDSIZE, topQuad, Quad};
+use crate::base_voxel::{CHUNKSIZE, Chunk, WORLDSIZE, topQuad,bottomQuad,leftQuad,rightQuad,frontQuad,backQuad, Quad};
 use std::collections::HashMap;
 
 pub struct Manager {
@@ -29,23 +29,51 @@ impl Manager {
         // todo
     }
     pub fn gen_cache(&mut self, chunk_index: v3::V3) {
-        let working_chunk: &mut Chunk;
-        match self.get_mut_chunk(chunk_index) {
-            Some(val) => working_chunk = val,
-            None => return
-        };
+        let working_chunk: &mut Chunk = self.get_mut_chunk(chunk_index).unwrap();
+        
         working_chunk.mesh_cache.clear();
+
         let mut block_index: v3::V3 = v3::V3 {x: CHUNKSIZE as u32 -1,y: CHUNKSIZE as u32 -1,z: CHUNKSIZE as u32 -1};
         while block_index.z < CHUNKSIZE as u32 {
             if working_chunk.data[block_index.toBlockKey()] != 0 {
-                if self.topNeighbourSolid(chunk_index, block_index) {
+                if self.top_neighbour_solid(chunk_index, block_index) {
                     let mut newQuad: Quad = topQuad;
                     for i in 0..4 {
                         newQuad.data[i] = newQuad.data[i] + block_index + (chunk_index*16);
                     }
                 }
+                if self.bottom_neighbour_solid(chunk_index, block_index) {
+                    let mut newQuad: Quad = bottomQuad;
+                    for i in 0..4 {
+                        newQuad.data[i] = newQuad.data[i] + block_index + (chunk_index*16);
+                    }
+                }
+                if self.left_neighbour_solid(chunk_index, block_index) {
+                    let mut newQuad: Quad = leftQuad;
+                    for i in 0..4 {
+                        newQuad.data[i] = newQuad.data[i] + block_index + (chunk_index*16);
+                    }
+                }
+                if self.right_neighbour_solid(chunk_index, block_index) {
+                    let mut newQuad: Quad = rightQuad;
+                    for i in 0..4 {
+                        newQuad.data[i] = newQuad.data[i] + block_index + (chunk_index*16);
+                    }
+                }
+                if self.front_neighbour_solid(chunk_index, block_index) {
+                    let mut newQuad: Quad = frontQuad;
+                    for i in 0..4 {
+                        newQuad.data[i] = newQuad.data[i] + block_index + (chunk_index*16);
+                    }
+                }
+                if self.back_neighbour_solid(chunk_index, block_index) {
+                    let mut newQuad: Quad = backQuad;
+                    for i in 0..4 {
+                        newQuad.data[i] = newQuad.data[i] + block_index + (chunk_index*16);
+                    }
+                }
             }
-
+            
             block_index.y -= (block_index.x >= CHUNKSIZE as u32) as u32;
             block_index.x %= CHUNKSIZE as u32;
             block_index.z -= (block_index.y >= CHUNKSIZE as u32) as u32;
@@ -53,7 +81,7 @@ impl Manager {
             block_index.x -= 1;
         }
     }
-    fn topNeighbourSolid(&self, mut chunk_index: v3::V3, mut block_index: v3::V3) -> bool {
+    fn top_neighbour_solid(&self, mut chunk_index: v3::V3, mut block_index: v3::V3) -> bool {
         block_index.y += 1;
         if (block_index.y >= CHUNKSIZE as u32) {
             block_index.y = 0;
@@ -69,7 +97,7 @@ impl Manager {
             }
         }
     }
-    fn bottomNeighbourSolid(&self, mut chunk_index: v3::V3, mut block_index: v3::V3) -> bool {
+    fn bottom_neighbour_solid(&self, mut chunk_index: v3::V3, mut block_index: v3::V3) -> bool {
         block_index.y -= 1;
         if (block_index.y >= CHUNKSIZE as u32) {
             block_index.y = CHUNKSIZE as u32 - 1;
@@ -85,7 +113,7 @@ impl Manager {
             }
         }
     }
-    fn rightNeighbourSolid(&self, mut chunk_index: v3::V3, mut block_index: v3::V3) -> bool {
+    fn right_neighbour_solid(&self, mut chunk_index: v3::V3, mut block_index: v3::V3) -> bool {
         block_index.x += 1;
         if (block_index.x >= CHUNKSIZE as u32) {
             block_index.x = 0;
@@ -101,7 +129,7 @@ impl Manager {
             }
         }
     }
-    fn leftNeighbourSolid(&self, mut chunk_index: v3::V3, mut block_index: v3::V3) -> bool {
+    fn left_neighbour_solid(&self, mut chunk_index: v3::V3, mut block_index: v3::V3) -> bool {
         block_index.x -= 1;
         if (block_index.x >= CHUNKSIZE as u32) {
             block_index.x = CHUNKSIZE as u32 - 1;
@@ -117,7 +145,7 @@ impl Manager {
             }
         }
     }
-    fn frontNeighbourSolid(&self, mut chunk_index: v3::V3, mut block_index: v3::V3) -> bool {
+    fn front_neighbour_solid(&self, mut chunk_index: v3::V3, mut block_index: v3::V3) -> bool {
         block_index.z += 1;
         if (block_index.z >= CHUNKSIZE as u32) {
             block_index.z = 0;
@@ -133,7 +161,7 @@ impl Manager {
             }
         }
     }
-    fn backNeighbourSolid(&self, mut chunk_index: v3::V3, mut block_index: v3::V3) -> bool {
+    fn back_neighbour_solid(&self, mut chunk_index: v3::V3, mut block_index: v3::V3) -> bool {
         block_index.z -= 1;
         if (block_index.z >= CHUNKSIZE as u32) {
             block_index.z = CHUNKSIZE as u32 - 1;
