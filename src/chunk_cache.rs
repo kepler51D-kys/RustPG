@@ -1,5 +1,5 @@
 use crate::v3;
-use crate::base_voxel::{CHUNKSIZE, Chunk, WORLDSIZE, topQuad,bottomQuad,leftQuad,rightQuad,frontQuad,backQuad, Quad};
+use crate::base_voxel::{CHUNKLEN, CHUNKSIZE, Chunk, Quad, WORLDSIZE, backQuad, bottomQuad, frontQuad, leftQuad, rightQuad, topQuad};
 use std::collections::HashMap;
 
 pub struct Manager {
@@ -29,47 +29,47 @@ impl Manager {
         // todo
     }
     pub fn gen_cache(&mut self, chunk_index: v3::V3) {
-        let working_chunk: &mut Chunk = self.get_mut_chunk(chunk_index).unwrap();
-        
-        working_chunk.mesh_cache.clear();
+        // let working_chunk: &mut Chunk = self.get_mut_chunk(chunk_index).unwrap();
 
+        self.get_mut_chunk(chunk_index).unwrap().mesh_cache.clear();
         let mut block_index: v3::V3 = v3::V3 {x: CHUNKSIZE as u32 -1,y: CHUNKSIZE as u32 -1,z: CHUNKSIZE as u32 -1};
         while block_index.z < CHUNKSIZE as u32 {
-            if working_chunk.data[block_index.toBlockKey()] != 0 {
+            let skip: bool = self.get_mut_chunk(chunk_index).unwrap().data[block_index.toBlockKey()] == 0;
+            if !skip {
                 if self.top_neighbour_solid(chunk_index, block_index) {
                     let mut newQuad: Quad = topQuad;
                     for i in 0..4 {
-                        newQuad.data[i] = newQuad.data[i] + block_index + (chunk_index*16);
+                        newQuad.data[i] = newQuad.data[i] + block_index + (chunk_index*CHUNKSIZE as u32);
                     }
                 }
                 if self.bottom_neighbour_solid(chunk_index, block_index) {
                     let mut newQuad: Quad = bottomQuad;
                     for i in 0..4 {
-                        newQuad.data[i] = newQuad.data[i] + block_index + (chunk_index*16);
+                        newQuad.data[i] = newQuad.data[i] + block_index + (chunk_index*CHUNKSIZE as u32);
                     }
                 }
                 if self.left_neighbour_solid(chunk_index, block_index) {
                     let mut newQuad: Quad = leftQuad;
                     for i in 0..4 {
-                        newQuad.data[i] = newQuad.data[i] + block_index + (chunk_index*16);
+                        newQuad.data[i] = newQuad.data[i] + block_index + (chunk_index*CHUNKSIZE as u32);
                     }
                 }
                 if self.right_neighbour_solid(chunk_index, block_index) {
                     let mut newQuad: Quad = rightQuad;
                     for i in 0..4 {
-                        newQuad.data[i] = newQuad.data[i] + block_index + (chunk_index*16);
+                        newQuad.data[i] = newQuad.data[i] + block_index + (chunk_index*CHUNKSIZE as u32);
                     }
                 }
                 if self.front_neighbour_solid(chunk_index, block_index) {
                     let mut newQuad: Quad = frontQuad;
                     for i in 0..4 {
-                        newQuad.data[i] = newQuad.data[i] + block_index + (chunk_index*16);
+                        newQuad.data[i] = newQuad.data[i] + block_index + (chunk_index*CHUNKSIZE as u32);
                     }
                 }
                 if self.back_neighbour_solid(chunk_index, block_index) {
                     let mut newQuad: Quad = backQuad;
                     for i in 0..4 {
-                        newQuad.data[i] = newQuad.data[i] + block_index + (chunk_index*16);
+                        newQuad.data[i] = newQuad.data[i] + block_index + (chunk_index*CHUNKSIZE as u32);
                     }
                 }
             }
