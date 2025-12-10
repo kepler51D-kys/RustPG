@@ -4,19 +4,37 @@ use std::io::Read;
 use std::io::Seek;
 use std::thread;
 
-use bevy::mesh::Mesh;
+// use bevy::mesh::Mesh;
 use bevy::platform::collections::HashMap;
 
-use crate::base_voxel::{Chunk,BlockID,CHUNKLEN};
+// use crate::base_voxel::{BlockID};
+use crate::base_chunk::{Chunk,CHUNKLEN};
 use crate::v3;
 
 pub struct Manager {
     chunk_pos: HashMap<u128,u64>,
     world_name: String,
     world_file: fs::File,
-    worker_thread: thread::Thread,
+    // worker_thread: thread::Thread,
+}
+impl Default for Manager {
+    fn default() -> Self {
+        return Self {
+            chunk_pos: HashMap::new(),
+            world_name: String::from("worlds/test.world"),
+            world_file: fs::OpenOptions::new().read(true).write(true).create(true).open("worlds/test.world").unwrap()
+        };
+    }
 }
 impl Manager {
+    pub fn init(name: String, ) -> Self {
+
+        return Self {
+            world_name: name.clone(),
+            world_file: fs::OpenOptions::new().read(true).write(true).create(true).open(name).unwrap(),
+            chunk_pos: HashMap::new()
+        };
+    }
     pub fn open_file(&mut self, file_name: String) -> io::Result<()> {
         self.world_name = file_name;
         self.world_file = fs::OpenOptions::new()
