@@ -79,7 +79,7 @@ impl Div<u32> for V3 {
     }
 }
 impl V3 {
-    pub fn toKey(&self) -> u128 {
+    pub fn to_key(&self) -> u128 {
         let mut key: u128 = 0;
         key |= self.x as u128;
         key <<= 32;
@@ -88,7 +88,7 @@ impl V3 {
         key |= self.z as u128;
         return key;
     }
-    pub fn toBlockKey(&self) -> usize {
+    pub fn to_block_key(&self) -> usize {
         let mut key: usize = 0;
         key += self.x as usize;
         key *= CHUNKSIZE as usize;

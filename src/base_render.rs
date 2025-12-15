@@ -3,37 +3,38 @@ use crate::v3;
 pub struct Quad {
     pub data: [v3::V3; 4],
 }
-pub const top_quad: Quad = Quad {data: [
+pub const RENDER_DISTANCE: u32 = 8;
+pub const TOP_QUAD: Quad = Quad {data: [
     v3::new(0,1,1),
     v3::new(1,1,1),
     v3::new(1,1,0),
     v3::new(0,1,0)
 ]};
-pub const bottom_quad: Quad = Quad {data: [
+pub const BOTTOM_QUAD: Quad = Quad {data: [
     v3::new(0,0,1),
     v3::new(1,0,1),
     v3::new(1,0,0),
     v3::new(0,0,0)
 ]};
-pub const left_quad: Quad = Quad {data: [
+pub const LEFT_QUAD: Quad = Quad {data: [
     v3::new(0,0,0),
     v3::new(0,0,1),
     v3::new(0,1,1),
     v3::new(0,1,0)
 ]};
-pub const right_quad: Quad = Quad {data: [
+pub const RIGHT_QUAD: Quad = Quad {data: [
     v3::new(1,0,0),
     v3::new(1,0,1),
     v3::new(1,1,1),
     v3::new(1,1,0)
 ]};
-pub const back_quad: Quad = Quad {data: [
+pub const BACK_QUAD: Quad = Quad {data: [
     v3::new(0,0,0),
     v3::new(1,0,0),
     v3::new(1,1,0),
     v3::new(0,1,0)
 ]};
-pub const front_quad: Quad = Quad {data: [
+pub const FRONT_QUAD: Quad = Quad {data: [
     v3::new(0,0,1),
     v3::new(1,0,1),
     v3::new(1,1,1),

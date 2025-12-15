@@ -2,7 +2,7 @@ use std::fs;
 use std::io;
 use std::io::Read;
 use std::io::Seek;
-use std::thread;
+// use std::thread;
 
 // use bevy::mesh::Mesh;
 use bevy::platform::collections::HashMap;
@@ -46,24 +46,24 @@ impl Manager {
         return Ok(());
     }
     pub fn read_chunk(&mut self, index: v3::V3) -> io::Result<Option<Chunk>> {
-        let key = index.toKey();
+        let key = index.to_key();
         match self.chunk_pos.get(&key) {
             Some(&file_pos) => {
                 self.world_file.seek(io::SeekFrom::Start(file_pos))?;
 
-                let mut retChunk: Chunk = Chunk::default();
+                let mut ret_chunk: Chunk = Chunk::default();
                 let u8_buffer = unsafe {
                     std::slice::from_raw_parts_mut(
-                        retChunk.data.as_mut_ptr() as *mut u8,
+                        ret_chunk.data.as_mut_ptr() as *mut u8,
                         CHUNKLEN * std::mem::size_of::<u16>()
                     )
                 };
                 self.world_file.read_exact(u8_buffer)?;
 
-                Ok(Some(retChunk))
+                Ok(Some(ret_chunk))
             }
             None => {
-                println!("Chunk not found at index {:?}", index.toKey());
+                println!("Chunk not found at index {:?}", index.to_key());
                 Ok(None)
             }
         }

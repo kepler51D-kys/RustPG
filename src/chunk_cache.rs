@@ -1,7 +1,7 @@
 use crate::v3;
 use crate::base_voxel::{BlockID, WORLDSIZE};
 use crate::base_chunk::{CHUNKSIZE, Chunk};
-use crate::base_render::{Quad, back_quad, bottom_quad, front_quad, left_quad, right_quad, top_quad};
+use crate::base_render::{Quad, BACK_QUAD,FRONT_QUAD,LEFT_QUAD,RIGHT_QUAD,TOP_QUAD,BOTTOM_QUAD};
 use std::collections::HashMap;
 
 pub struct Manager {
@@ -24,16 +24,16 @@ impl Manager {
         }
     }
     pub fn get_mut_chunk(&mut self, index: v3::V3) -> Option<&mut Chunk> {
-        return self.chunk_cache.get_mut(&index.toKey());
+        return self.chunk_cache.get_mut(&index.to_key());
     }
     pub fn get_chunk(&self, index: v3::V3) -> Option<&Chunk> {
-        return self.chunk_cache.get(&index.toKey());
+        return self.chunk_cache.get(&index.to_key());
     }
     pub fn add_chunk(&mut self, index: v3::V3, chunk: Chunk) {
-        self.chunk_cache.insert(index.toKey(), chunk);
+        self.chunk_cache.insert(index.to_key(), chunk);
     }
     pub fn remove_chunk(&mut self, index: v3::V3) {
-        self.chunk_cache.remove(&index.toKey());
+        self.chunk_cache.remove(&index.to_key());
     }
     pub fn render_chunk(&mut self, index: v3::V3) {
         let chunk: &Chunk = self.get_chunk(index).unwrap();
@@ -54,45 +54,45 @@ impl Manager {
         };
 
         while block_index.z < CHUNKSIZE as u32 {
-            let skip: bool = chunk.data[block_index.toBlockKey()] == BlockID::Air;
+            let skip: bool = chunk.data[block_index.to_block_key()] == BlockID::Air;
             if !skip {
                 if top_neighbour_solid(&self.chunk_cache,chunk_index, block_index) {
-                    let mut new_quad: Quad = top_quad;
+                    let mut new_quad: Quad = TOP_QUAD;
                     for i in 0..4 {
                         new_quad.data[i] += block_index + (chunk_index*CHUNKSIZE as u32);
                     }
                     mesh.push(new_quad);
                 }
                 if bottom_neighbour_solid(&self.chunk_cache, chunk_index, block_index) {
-                    let mut new_quad: Quad = bottom_quad;
+                    let mut new_quad: Quad = BOTTOM_QUAD;
                     for i in 0..4 {
                         new_quad.data[i] += block_index + (chunk_index*CHUNKSIZE as u32);
                     }
                     mesh.push(new_quad);
                 }
                 if left_neighbour_solid(&self.chunk_cache, chunk_index, block_index) {
-                    let mut new_quad: Quad = left_quad;
+                    let mut new_quad: Quad = LEFT_QUAD;
                     for i in 0..4 {
                         new_quad.data[i] += block_index + (chunk_index*CHUNKSIZE as u32);
                     }
                     mesh.push(new_quad);
                 }
                 if right_neighbour_solid(&self.chunk_cache, chunk_index, block_index) {
-                    let mut new_quad: Quad = right_quad;
+                    let mut new_quad: Quad = RIGHT_QUAD;
                     for i in 0..4 {
                         new_quad.data[i] += block_index + (chunk_index*CHUNKSIZE as u32);
                     }
                     mesh.push(new_quad);
                 }
                 if front_neighbour_solid(&self.chunk_cache, chunk_index, block_index) {
-                    let mut new_quad: Quad = front_quad;
+                    let mut new_quad: Quad = FRONT_QUAD;
                     for i in 0..4 {
                         new_quad.data[i] += block_index + (chunk_index*CHUNKSIZE as u32);
                     }
                     mesh.push(new_quad);
                 }
                 if back_neighbour_solid(&self.chunk_cache, chunk_index, block_index) {
-                    let mut new_quad: Quad = back_quad;
+                    let mut new_quad: Quad = BACK_QUAD;
                     for i in 0..4 {
                         new_quad.data[i] += block_index + (chunk_index*CHUNKSIZE as u32);
                     }
@@ -119,8 +119,8 @@ fn top_neighbour_solid(chunk_cache: &HashMap<u128,Chunk>, mut chunk_index: v3::V
         return false;
     }
     else {
-        match chunk_cache.get(&chunk_index.toKey()) {
-            Some(val) => {return val.data[block_index.toBlockKey()] != BlockID::Air},
+        match chunk_cache.get(&chunk_index.to_key()) {
+            Some(val) => {return val.data[block_index.to_block_key()] != BlockID::Air},
             None => return false
         }
     }
@@ -135,8 +135,8 @@ fn bottom_neighbour_solid(chunk_cache: &HashMap<u128,Chunk>, mut chunk_index: v3
         return false;
     }
     else {
-        match chunk_cache.get(&chunk_index.toKey()) {
-            Some(val) => return val.data[block_index.toBlockKey()] != BlockID::Air,
+        match chunk_cache.get(&chunk_index.to_key()) {
+            Some(val) => return val.data[block_index.to_block_key()] != BlockID::Air,
             None => return false
         }
     }
@@ -151,8 +151,8 @@ fn right_neighbour_solid(chunk_cache: &HashMap<u128,Chunk>, mut chunk_index: v3:
         return false;
     }
     else {
-        match chunk_cache.get(&chunk_index.toKey()) {
-            Some(val) => return val.data[block_index.toBlockKey()] != BlockID::Air,
+        match chunk_cache.get(&chunk_index.to_key()) {
+            Some(val) => return val.data[block_index.to_block_key()] != BlockID::Air,
             None => return false
         }
     }
@@ -167,8 +167,8 @@ fn left_neighbour_solid(chunk_cache: &HashMap<u128,Chunk>, mut chunk_index: v3::
         return false;
     }
     else {
-        match chunk_cache.get(&chunk_index.toKey()) {
-            Some(val) => return val.data[block_index.toBlockKey()] != BlockID::Air,
+        match chunk_cache.get(&chunk_index.to_key()) {
+            Some(val) => return val.data[block_index.to_block_key()] != BlockID::Air,
             None => return false
         }
     }
@@ -183,8 +183,8 @@ fn front_neighbour_solid(chunk_cache: &HashMap<u128,Chunk>, mut chunk_index: v3:
         return false;
     }
     else {
-        match chunk_cache.get(&chunk_index.toKey()) {
-            Some(val) => return val.data[block_index.toBlockKey()] != BlockID::Air,
+        match chunk_cache.get(&chunk_index.to_key()) {
+            Some(val) => return val.data[block_index.to_block_key()] != BlockID::Air,
             None => return false
         }
     }
@@ -199,8 +199,8 @@ fn back_neighbour_solid(chunk_cache: &HashMap<u128,Chunk>, mut chunk_index: v3::
         return false;
     }
     else {
-        match chunk_cache.get(&chunk_index.toKey()) {
-            Some(val) => return val.data[block_index.toBlockKey()] != BlockID::Air,
+        match chunk_cache.get(&chunk_index.to_key()) {
+            Some(val) => return val.data[block_index.to_block_key()] != BlockID::Air,
             None => return false
         }
     }

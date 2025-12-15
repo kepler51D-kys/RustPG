@@ -1,5 +1,3 @@
-use std::cmp::{Eq};
-
 pub const WORLDSIZE: u32 = 32;
 
 #[repr(u16)]

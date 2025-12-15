@@ -1,55 +1,52 @@
-mod v3;
-mod base_voxel;
-mod base_chunk;
-mod base_render;
-mod chunk_cache;
-mod world_file;
-
+#![allow(dead_code)]
+use bevy::camera::Camera3d;
+// use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::prelude::*;
 use bevy::window::{Window, WindowPlugin, WindowResolution};
-use crate::base_chunk::CHUNKSIZE;
+use bevy_voxel_world::prelude::{VoxelWorldCamera, VoxelWorldConfig, VoxelWorldPlugin, WorldVoxel};
 
-struct World {
-    chunk_cache_manager: chunk_cache::Manager,
-    world_file_manager: world_file::Manager,
-    render_distance: u16,
+
+#[derive(Resource, Clone, Default)]
+struct MainWorld;
+
+impl VoxelWorldConfig for MainWorld {
+    type MaterialIndex = u8;
+    type ChunkUserBundle = ();
+
+    fn spawning_distance(&self) -> u32 {
+        25
+    }
+    // fn voxel_lookup_delegate(&self) -> VoxelLookupDelegate<Self::MaterialIndex> {
+    //     Box::new(|_, _, _| Box::new(|_, _| WorldVoxel::Solid(0)))
+    // }
 }
-impl World {
-    fn render(&mut self, mut centerCoord: v3::V3) {
-        centerCoord /= CHUNKSIZE as u32;
-        let start: v3::V3 = v3::V3 {
-            x: centerCoord.x-(self.render_distance as u32)/2,
-            y: centerCoord.y-(self.render_distance as u32)/2,
-            z: centerCoord.z-(self.render_distance as u32)/2,
-        };
-        let end: v3::V3 = v3::V3 {
-            x: centerCoord.x+(self.render_distance as u32)/2,
-            y: centerCoord.y+(self.render_distance as u32)/2,
-            z: centerCoord.z+(self.render_distance as u32)/2,
-        };
-        for x in start.x..end.x {
-            for y in start.y..end.y {
-                for z in start.z..end.z {
-                    let offset: v3::V3 = v3::V3 {x:x, y:y, z:z};
-                    self.chunk_cache_manager.render_chunk(offset);
-                }
+fn setup(
+    mut commands: Commands,
+    mut voxel_world: bevy_voxel_world::prelude::VoxelWorld<MainWorld>
+) {
+    commands.spawn((
+        Camera3d::default(),
+        Camera::default(),
+        Transform::from_xyz(-20.0, 10.0, -20.0).looking_at(Vec3::ZERO, Vec3::Y),
+        Projection::Perspective(PerspectiveProjection::default()),
+        VoxelWorldCamera::<MainWorld>::default(),
+    ));
+
+    // commands.insert_resource(AmbientLight {
+    //     color: Color::srgb(0.98, 0.95, 0.82),
+    //     brightness: 100.0,
+    //     affects_lightmapped_meshes: true,
+    // });
+
+    for x in -8..8 {
+        for y in -8..8 {
+            for z in -8..8 {
+                voxel_world.set_voxel(IVec3 { x: x, y: y, z: z}, WorldVoxel::Solid(0));
             }
         }
     }
 }
-impl Default for World {
-    fn default() -> Self {
-        let world_file_manager: world_file::Manager = world_file::Manager::Default();
-        return Self {
-            chunk_cache_manager: chunk_cache::Manager::Default(),
-            world_file_manager: world_file::Manager::init(),
-            render_distance: 6
-        };
-    }
-}
-
 fn main() {
-    let newWorld: World = World::Default();
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
@@ -61,9 +58,15 @@ fn main() {
                 decorations: true,
                 transparent: false,
                 ..default()
-            }),
+            }
+            ),
             ..default()
         }))
-        .add_systems(Update, systems)
+        // .add_plugins((
+        //     FrameTimeDiagnosticsPlugin::default(),
+        //     LogDiagnosticsPlugin::default(),
+        // ))
+        .add_plugins(VoxelWorldPlugin::with_config(MainWorld))
+        .add_systems(Startup, setup)
         .run();
 }
