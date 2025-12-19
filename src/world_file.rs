@@ -9,10 +9,10 @@ use bevy::platform::collections::HashMap;
 
 // use crate::base_voxel::{BlockID};
 use crate::base_chunk::{Chunk,CHUNKLEN};
-use crate::v3;
+use crate::v3::{V3};
 
 pub struct Manager {
-    chunk_pos: HashMap<u128,u64>,
+    chunk_pos: HashMap<V3,u64>,
     world_name: String,
     world_file: fs::File,
     // worker_thread: thread::Thread,
@@ -45,9 +45,8 @@ impl Manager {
         
         return Ok(());
     }
-    pub fn read_chunk(&mut self, index: v3::V3) -> io::Result<Option<Chunk>> {
-        let key = index.to_key();
-        match self.chunk_pos.get(&key) {
+    pub fn read_chunk(&mut self, index: V3) -> io::Result<Option<Chunk>> {
+        match self.chunk_pos.get(&index) {
             Some(&file_pos) => {
                 self.world_file.seek(io::SeekFrom::Start(file_pos))?;
 
@@ -63,7 +62,7 @@ impl Manager {
                 Ok(Some(ret_chunk))
             }
             None => {
-                println!("Chunk not found at index {:?}", index.to_key());
+                println!("Chunk not found at index {:?}", index);
                 Ok(None)
             }
         }
