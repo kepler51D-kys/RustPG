@@ -8,7 +8,7 @@ mod world_file;
 mod world;
 
 use bevy::camera::Camera3d;
-use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
+// use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 // use bevy::prelude::*;
 use bevy::window::{Window, WindowPlugin, WindowResolution};
 use bevy::{prelude::*};

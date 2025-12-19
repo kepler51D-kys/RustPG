@@ -83,12 +83,12 @@ impl Manager {
                     }
                     // mesh.push(new_quad);
                     indices.push(start_val);
+                    indices.push(start_val+3);
                     indices.push(start_val+1);
-                    indices.push(start_val+3);
                     indices.push(start_val);
-                    indices.push(start_val+3);
                     indices.push(start_val+2);
-                    
+                    indices.push(start_val+3);
+
                     normals.push(Vec3 {x: 0.0, y: 0.0, z: 1.0});
                     normals.push(Vec3 {x: 0.0, y: 0.0, z: 1.0});
                 }
@@ -101,11 +101,11 @@ impl Manager {
                     }
                     // mesh.push(new_quad);
                     indices.push(start_val);
+                    indices.push(start_val+3);
                     indices.push(start_val+1);
-                    indices.push(start_val+3);
                     indices.push(start_val);
-                    indices.push(start_val+3);
                     indices.push(start_val+2);
+                    indices.push(start_val+3);
 
                     normals.push(Vec3 {x: 0.0, y: 0.0, z: 1.0});
                     normals.push(Vec3 {x: 0.0, y: 0.0, z: 1.0});
@@ -119,11 +119,11 @@ impl Manager {
                     }
                     // mesh.push(new_quad);
                     indices.push(start_val);
+                    indices.push(start_val+3);
                     indices.push(start_val+1);
-                    indices.push(start_val+3);
                     indices.push(start_val);
-                    indices.push(start_val+3);
                     indices.push(start_val+2);
+                    indices.push(start_val+3);
 
                     normals.push(Vec3 {x: 0.0, y: 0.0, z: 1.0});
                     normals.push(Vec3 {x: 0.0, y: 0.0, z: 1.0});
@@ -137,11 +137,11 @@ impl Manager {
                     }
                     // mesh.push(new_quad);
                     indices.push(start_val);
+                    indices.push(start_val+3);
                     indices.push(start_val+1);
-                    indices.push(start_val+3);
                     indices.push(start_val);
-                    indices.push(start_val+3);
                     indices.push(start_val+2);
+                    indices.push(start_val+3);
 
                     normals.push(Vec3 {x: 0.0, y: 0.0, z: 1.0});
                     normals.push(Vec3 {x: 0.0, y: 0.0, z: 1.0});
@@ -155,11 +155,11 @@ impl Manager {
                     }
                     // mesh.push(new_quad);
                     indices.push(start_val);
+                    indices.push(start_val+3);
                     indices.push(start_val+1);
-                    indices.push(start_val+3);
                     indices.push(start_val);
-                    indices.push(start_val+3);
                     indices.push(start_val+2);
+                    indices.push(start_val+3);
 
                     normals.push(Vec3 {x: 0.0, y: 0.0, z: 1.0});
                     normals.push(Vec3 {x: 0.0, y: 0.0, z: 1.0});
@@ -173,11 +173,11 @@ impl Manager {
                     }
                     // mesh.push(new_quad);
                     indices.push(start_val);
+                    indices.push(start_val+3);
                     indices.push(start_val+1);
-                    indices.push(start_val+3);
                     indices.push(start_val);
-                    indices.push(start_val+3);
                     indices.push(start_val+2);
+                    indices.push(start_val+3);
 
                     normals.push(Vec3 {x: 0.0, y: 0.0, z: 1.0});
                     normals.push(Vec3 {x: 0.0, y: 0.0, z: 1.0});
@@ -192,18 +192,11 @@ impl Manager {
         }
         // self.get_mut_chunk(chunk_index).unwrap().mesh_cache = mesh;
         
-        let thingy: Mesh = Mesh::new(PrimitiveTopology::TriangleList, RenderAssetUsages::default())
+        self.get_mut_chunk(chunk_index).unwrap().mesh_cache = Mesh::new(PrimitiveTopology::TriangleList, RenderAssetUsages::default())
         .with_inserted_attribute(
             Mesh::ATTRIBUTE_POSITION,
             vertices
         )
-        // Assign a UV coordinate to each vertex.
-        // .with_inserted_attribute(
-        //     Mesh::ATTRIBUTE_UV_0,
-
-        //     // vec![[0.0, 1.0], [0.5, 0.0], [1.0, 0.0], [0.5, 1.0]]
-        // )
-        // Assign normals (everything points outwards)
         .with_inserted_attribute(
             Mesh::ATTRIBUTE_NORMAL,
             normals
@@ -215,6 +208,7 @@ impl Manager {
         ));
     }
 }
+
 fn top_neighbour_solid(chunk_cache: &HashMap<UVec3,Chunk>, mut chunk_index: UVec3, mut block_index: UVec3) -> bool {
     block_index.y += 1;
     if block_index.y >= CHUNKSIZE as u32 {
@@ -311,3 +305,4 @@ fn back_neighbour_solid(chunk_cache: &HashMap<UVec3,Chunk>, mut chunk_index: UVe
         }
     }
 }
+// ahh
