@@ -1,23 +1,20 @@
+use std::collections::HashMap;
 use std::fs;
 use std::io;
 use std::io::Read;
 use std::io::Seek;
-// use std::thread;
 
-// use bevy::mesh::Mesh;
-use bevy::platform::collections::HashMap;
+use glam::UVec3;
 
-// use crate::base_voxel::{BlockID};
-use crate::base_chunk::{Chunk,CHUNKLEN};
-use crate::v3::{V3};
+use crate::voxels::base_chunk::{Chunk,CHUNKLEN};
 
-pub struct Manager {
-    chunk_pos: HashMap<V3,u64>,
+pub struct FileManager {
+    chunk_pos: HashMap<UVec3,u64>,
     world_name: String,
     world_file: fs::File,
     // worker_thread: thread::Thread,
 }
-impl Default for Manager {
+impl Default for FileManager {
     fn default() -> Self {
         return Self {
             chunk_pos: HashMap::new(),
@@ -26,7 +23,7 @@ impl Default for Manager {
         };
     }
 }
-impl Manager {
+impl FileManager {
     pub fn init(name: String, ) -> Self {
 
         return Self {
@@ -45,7 +42,7 @@ impl Manager {
         
         return Ok(());
     }
-    pub fn read_chunk(&mut self, index: V3) -> io::Result<Option<Chunk>> {
+    pub fn read_chunk(&mut self, index: UVec3) -> io::Result<Option<Chunk>> {
         match self.chunk_pos.get(&index) {
             Some(&file_pos) => {
                 self.world_file.seek(io::SeekFrom::Start(file_pos))?;

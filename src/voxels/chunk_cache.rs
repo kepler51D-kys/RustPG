@@ -1,18 +1,16 @@
-use bevy::asset::RenderAssetUsages;
-use bevy::math::{UVec3, Vec3};
-use bevy::mesh::{Indices, Mesh, PrimitiveTopology};
+use glam::{UVec3,Vec3};
 
-use crate::base_voxel::{BlockID, WORLDSIZE};
-use crate::base_chunk::{CHUNKSIZE, Chunk};
-use crate::base_render::{Quad, BACK_QUAD,FRONT_QUAD,LEFT_QUAD,RIGHT_QUAD,TOP_QUAD,BOTTOM_QUAD};
+use crate::voxels::base_voxel::{BlockID, WORLDSIZE};
+use crate::voxels::base_chunk::{CHUNKSIZE, Chunk};
+use crate::voxels::base_render::{BACK_QUAD, BOTTOM_QUAD, FRONT_QUAD, LEFT_QUAD, Mesh, Quad, RIGHT_QUAD, TOP_QUAD};
 use crate::v3::get_block_index;
 use std::collections::HashMap;
 
-pub struct Manager {
+pub struct ChunkCacheManager {
     chunk_cache: HashMap<UVec3,Chunk>,
     cache_size: usize,
 }
-impl Default for Manager {
+impl Default for ChunkCacheManager {
     fn default() -> Self {
         return Self {
             chunk_cache: HashMap::new(),
@@ -20,7 +18,7 @@ impl Default for Manager {
         };
     }
 }
-impl Manager {
+impl ChunkCacheManager {
     pub fn new(cache_size: usize) -> Self {
         Self {
             chunk_cache: HashMap::with_capacity(cache_size),
@@ -47,11 +45,13 @@ impl Manager {
         if chunk.mesh_dirty {
             self.gen_cache(index);
         }
+
+        
     }
     pub fn gen_cache(&mut self, chunk_index: UVec3) {
 
         let mut vertices:Vec<Vec3> = Vec::new();
-        let mut normals:Vec<Vec3> = Vec::new();
+        // let mut normals:Vec<Vec3> = Vec::new();
         let mut indices:Vec<u32> = Vec::new();
 
         let chunk: &Chunk = self.get_chunk(chunk_index).unwrap();
@@ -89,8 +89,8 @@ impl Manager {
                     indices.push(start_val+2);
                     indices.push(start_val+3);
 
-                    normals.push(Vec3 {x: 0.0, y: 0.0, z: 1.0});
-                    normals.push(Vec3 {x: 0.0, y: 0.0, z: 1.0});
+                    // normals.push(Vec3 {x: 0.0, y: 1.0, z: 0.0});
+                    // normals.push(Vec3 {x: 0.0, y: 1.0, z: 0.0});
                 }
                 if bottom_neighbour_solid(&self.chunk_cache, chunk_index, block_index) {
                     let start_val: u32 = vertices.len() as u32;
@@ -107,8 +107,8 @@ impl Manager {
                     indices.push(start_val+2);
                     indices.push(start_val+3);
 
-                    normals.push(Vec3 {x: 0.0, y: 0.0, z: 1.0});
-                    normals.push(Vec3 {x: 0.0, y: 0.0, z: 1.0});
+                    // normals.push(Vec3 {x: 0.0, y: -1.0, z: 0.0});
+                    // normals.push(Vec3 {x: 0.0, y: -1.0, z: 0.0});
                 }
                 if left_neighbour_solid(&self.chunk_cache, chunk_index, block_index) {
                     let start_val: u32 = vertices.len() as u32;
@@ -125,8 +125,8 @@ impl Manager {
                     indices.push(start_val+2);
                     indices.push(start_val+3);
 
-                    normals.push(Vec3 {x: 0.0, y: 0.0, z: 1.0});
-                    normals.push(Vec3 {x: 0.0, y: 0.0, z: 1.0});
+                    // normals.push(Vec3 {x: 1.0, y: 0.0, z: 0.0});
+                    // normals.push(Vec3 {x: 1.0, y: 0.0, z: 0.0});
                 }
                 if right_neighbour_solid(&self.chunk_cache, chunk_index, block_index) {
                     let start_val: u32 = vertices.len() as u32;
@@ -143,8 +143,8 @@ impl Manager {
                     indices.push(start_val+2);
                     indices.push(start_val+3);
 
-                    normals.push(Vec3 {x: 0.0, y: 0.0, z: 1.0});
-                    normals.push(Vec3 {x: 0.0, y: 0.0, z: 1.0});
+                    // normals.push(Vec3 {x: -1.0, y: 0.0, z: 0.0});
+                    // normals.push(Vec3 {x: -1.0, y: 0.0, z: 0.0});
                 }
                 if front_neighbour_solid(&self.chunk_cache, chunk_index, block_index) {
                     let start_val: u32 = vertices.len() as u32;
@@ -161,8 +161,8 @@ impl Manager {
                     indices.push(start_val+2);
                     indices.push(start_val+3);
 
-                    normals.push(Vec3 {x: 0.0, y: 0.0, z: 1.0});
-                    normals.push(Vec3 {x: 0.0, y: 0.0, z: 1.0});
+                    // normals.push(Vec3 {x: 0.0, y: 0.0, z: 1.0});
+                    // normals.push(Vec3 {x: 0.0, y: 0.0, z: 1.0});
                 }
                 if back_neighbour_solid(&self.chunk_cache, chunk_index, block_index) {
                     let start_val: u32 = vertices.len() as u32;
@@ -179,8 +179,8 @@ impl Manager {
                     indices.push(start_val+2);
                     indices.push(start_val+3);
 
-                    normals.push(Vec3 {x: 0.0, y: 0.0, z: 1.0});
-                    normals.push(Vec3 {x: 0.0, y: 0.0, z: 1.0});
+                    // normals.push(Vec3 {x: 0.0, y: 0.0, z: -1.0});
+                    // normals.push(Vec3 {x: 0.0, y: 0.0, z: -1.0});
                 }
             }
             
@@ -191,21 +191,8 @@ impl Manager {
             block_index.x -= 1;
         }
         // self.get_mut_chunk(chunk_index).unwrap().mesh_cache = mesh;
-        
-        self.get_mut_chunk(chunk_index).unwrap().mesh_cache = Mesh::new(PrimitiveTopology::TriangleList, RenderAssetUsages::default())
-        .with_inserted_attribute(
-            Mesh::ATTRIBUTE_POSITION,
-            vertices
-        )
-        .with_inserted_attribute(
-            Mesh::ATTRIBUTE_NORMAL,
-            normals
-        )
-        // After defining all the vertices and their attributes, build each triangle using the
-        // indices of the vertices that make it up in a counter-clockwise order.
-        .with_inserted_indices(Indices::U32(
-            indices
-        ));
+        // let length: usize = vertices.len();
+        self.get_mut_chunk(chunk_index).unwrap().mesh_cache = Mesh {verts:vertices,indices:indices};
     }
 }
 

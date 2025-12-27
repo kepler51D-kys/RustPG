@@ -1,4 +1,5 @@
-use bevy::math::Vec3;
+use glam::Vec3;
+
 
 #[derive(Clone, Copy)]
 pub struct Quad {
@@ -41,3 +42,16 @@ pub const FRONT_QUAD: Quad = Quad {data: [
     Vec3 {x:1.0,y:1.0,z:1.0},
     Vec3 {x:0.0,y:1.0,z:1.0}
 ]};
+
+pub struct Mesh {
+    pub verts: Vec<Vec3>,
+    pub indices: Vec<u32>
+}
+impl Mesh {
+    pub fn new() -> Self {
+        Self {
+            verts: Vec::new(),
+            indices: Vec::new(),
+        }
+    }
+}
