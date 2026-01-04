@@ -1,57 +1,43 @@
-use glam::Vec3;
-
+use crate::app_manager::mesh::Vertex;
 
 #[derive(Clone, Copy)]
 pub struct Quad {
-    pub data: [Vec3; 4],
+    pub data: [Vertex; 4],
 }
 pub const RENDER_DISTANCE: u32 = 8;
 pub const TOP_QUAD: Quad = Quad {data: [
-    Vec3 {x:0.0,y:1.0,z:1.0},
-    Vec3 {x:1.0,y:1.0,z:1.0},
-    Vec3 {x:1.0,y:1.0,z:0.0},
-    Vec3 {x:0.0,y:1.0,z:0.0}
+    Vertex {pos:[0.0,1.0,1.0]},
+    Vertex {pos:[1.0,1.0,1.0]},
+    Vertex {pos:[1.0,1.0,0.0]},
+    Vertex {pos:[0.0,1.0,0.0]}
 ]};
 pub const BOTTOM_QUAD: Quad = Quad {data: [
-    Vec3 {x:0.0,y:0.0,z:1.0},
-    Vec3 {x:1.0,y:0.0,z:1.0},
-    Vec3 {x:1.0,y:0.0,z:0.0},
-    Vec3 {x:0.0,y:0.0,z:0.0}
+    Vertex {pos:[0.0,0.0,1.0]},
+    Vertex {pos:[1.0,0.0,1.0]},
+    Vertex {pos:[1.0,0.0,0.0]},
+    Vertex {pos:[0.0,0.0,0.0]}
 ]};
 pub const LEFT_QUAD: Quad = Quad {data: [
-    Vec3 {x:0.0,y:0.0,z:0.0},
-    Vec3 {x:0.0,y:0.0,z:1.0},
-    Vec3 {x:0.0,y:1.0,z:1.0},
-    Vec3 {x:0.0,y:1.0,z:0.0}
+    Vertex {pos:[0.0,0.0,0.0]},
+    Vertex {pos:[0.0,0.0,1.0]},
+    Vertex {pos:[0.0,1.0,1.0]},
+    Vertex {pos:[0.0,1.0,0.0]}
 ]};
 pub const RIGHT_QUAD: Quad = Quad {data: [
-    Vec3 {x:1.0,y:0.0,z:0.0},
-    Vec3 {x:1.0,y:0.0,z:1.0},
-    Vec3 {x:1.0,y:1.0,z:1.0},
-    Vec3 {x:1.0,y:1.0,z:0.0}
+    Vertex {pos:[1.0,0.0,0.0]},
+    Vertex {pos:[1.0,0.0,1.0]},
+    Vertex {pos:[1.0,1.0,1.0]},
+    Vertex {pos:[1.0,1.0,0.0]}
 ]};
 pub const BACK_QUAD: Quad = Quad {data: [
-    Vec3 {x:0.0,y:0.0,z:0.0},
-    Vec3 {x:1.0,y:0.0,z:0.0},
-    Vec3 {x:1.0,y:1.0,z:0.0},
-    Vec3 {x:0.0,y:1.0,z:0.0}
+    Vertex {pos:[0.0,0.0,0.0]},
+    Vertex {pos:[1.0,0.0,0.0]},
+    Vertex {pos:[1.0,1.0,0.0]},
+    Vertex {pos:[0.0,1.0,0.0]}
 ]};
 pub const FRONT_QUAD: Quad = Quad {data: [
-    Vec3 {x:0.0,y:0.0,z:1.0},
-    Vec3 {x:1.0,y:0.0,z:1.0},
-    Vec3 {x:1.0,y:1.0,z:1.0},
-    Vec3 {x:0.0,y:1.0,z:1.0}
+    Vertex {pos:[0.0,0.0,1.0]},
+    Vertex {pos:[1.0,0.0,1.0]},
+    Vertex {pos:[1.0,1.0,1.0]},
+    Vertex {pos:[0.0,1.0,1.0]}
 ]};
-
-pub struct Mesh {
-    pub verts: Vec<Vec3>,
-    pub indices: Vec<u32>
-}
-impl Mesh {
-    pub fn new() -> Self {
-        Self {
-            verts: Vec::new(),
-            indices: Vec::new(),
-        }
-    }
-}
