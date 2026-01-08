@@ -1,11 +1,13 @@
 use std::sync::Arc;
 
+use glam::{Mat4, Vec3};
+use wgpu::util::DeviceExt;
 // use wgpu::util::DeviceExt;
 use winit::{
     event_loop::{ActiveEventLoop}, keyboard::{KeyCode}, window::Window
 };
 
-use crate::{app_manager::mesh::Mesh};
+use crate::app_manager::{camera::Camera, mesh::Mesh};
 
 pub struct State {
     // pub num_vertices: u32,
@@ -17,6 +19,10 @@ pub struct State {
     pub render_pipeline: wgpu::RenderPipeline,
     pub is_surface_configured: bool,
     pub window: Arc<Window>,
+    pub cam: Camera,
+    camera_buffer: wgpu::Buffer,
+    camera_bind_group: wgpu::BindGroup,
+    camera_uniform: Mat4,
     // pub vertex_buffer: wgpu::Buffer,
 }
 // const VERT_TEST: &[Vertex] = &[
@@ -70,6 +76,55 @@ impl State {
             view_formats: vec![],
             desired_maximum_frame_latency: 2,
         };
+        let camera = Camera {
+            // position the camera 1 unit up and 2 units back
+            // +z is out of the screen
+            eye: (0.0, 1.0, 2.0).into(),
+            // have it look at the origin
+            target: (0.0, 0.0, 0.0).into(),
+            // which way is "up"
+            up: Vec3::Y,
+            aspect: config.width as f32 / config.height as f32,
+            fovy: 45.0,
+            znear: 0.1,
+            zfar: 100.0,
+        };
+        let camera_uniform:Mat4 = camera.build_view_projection_matrix();
+
+        let camera_buffer = device.create_buffer_init(
+            &wgpu::util::BufferInitDescriptor {
+                label: Some("Camera Buffer"),
+                contents: bytemuck::cast_slice(&[camera_uniform]),
+                usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+            }
+        );
+        let camera_bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            entries: &[
+                wgpu::BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: wgpu::ShaderStages::VERTEX,
+                    ty: wgpu::BindingType::Buffer {
+                        ty: wgpu::BufferBindingType::Uniform,
+                        has_dynamic_offset: false,
+                        min_binding_size: None,
+                    },
+                    count: None,
+                }
+            ],
+            label: Some("camera_bind_group_layout"),
+        });
+        let camera_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            layout: &camera_bind_group_layout,
+            entries: &[
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: camera_buffer.as_entire_binding(),
+                }
+            ],
+            label: Some("camera_bind_group"),
+        });
+
+
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Shader"),
             source: wgpu::ShaderSource::Wgsl(include_str!("../shaders/test.wgsl").into()),
@@ -77,7 +132,7 @@ impl State {
         let render_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Render Pipeline Layout"),
-                bind_group_layouts: &[],
+                bind_group_layouts: &[&camera_bind_group_layout],
                 push_constant_ranges: &[],
             });
 
@@ -127,6 +182,10 @@ impl State {
         });
         surface.configure(&device, &config);
         Ok(Self {
+            camera_uniform,
+            camera_bind_group,
+            camera_buffer,
+            cam:camera,
             render_pipeline,
             surface,
             device,
@@ -171,17 +230,16 @@ impl State {
             let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("Render Pass"),
                 color_attachments: &[
-                    // This is what @location(0) in the fragment shader targets
                     Some(wgpu::RenderPassColorAttachment {
                         view: &view,
                         resolve_target: None,
                         ops: wgpu::Operations {
                             load: wgpu::LoadOp::Clear(
                                 wgpu::Color {
-                                    r: 0.1,
-                                    g: 0.2,
-                                    b: 0.3,
-                                    a: 1.0,
+                                    r: 0.05,
+                                    g: 0.05,
+                                    b: 0.025,
+                                    a: 0.0,
                                 }
                             ),
                             store: wgpu::StoreOp::Store,
@@ -193,11 +251,12 @@ impl State {
                 timestamp_writes: None, // ehhh not sure bout ts
                 occlusion_query_set: None, // ehhh not sure bout ts
             });
-
-            render_pass.set_pipeline(&self.render_pipeline); // 2.
+            render_pass.set_pipeline(&self.render_pipeline);
+            
+            render_pass.set_bind_group(0, &self.camera_bind_group, &[]);
             render_pass.set_vertex_buffer(0, mesh.construct_vertex_buffer(&self.device).slice(..));
             render_pass.set_index_buffer(mesh.construct_index_buffer(&self.device).slice(..),wgpu::IndexFormat::Uint16);
-            render_pass.draw_indexed(0..mesh.num_indices(),0, 0..1); // 3.
+            render_pass.draw_indexed(0..mesh.num_indices(),0, 0..1);
         }
 
         self.queue.submit(std::iter::once(encoder.finish()));

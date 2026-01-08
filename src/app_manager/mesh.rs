@@ -3,6 +3,8 @@ use std::ops::{Add, AddAssign, Sub, SubAssign};
 use glam::{Mat4, Vec3};
 use wgpu::{Device, util::DeviceExt};
 
+use crate::voxels::chunk_cache::IndicesSize;
+
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct Vertex {
@@ -64,7 +66,7 @@ impl SubAssign for Vertex {
 #[derive(Clone, Debug)]
 pub struct Mesh {
     pub vertices: Vec<Vertex>,
-    pub indices: Vec<u16>,
+    pub indices: Vec<IndicesSize>,
 }
 
 impl Mesh {
@@ -83,7 +85,6 @@ impl Mesh {
             }
         )
     }
-
     pub fn construct_vertex_buffer(&self, device: &Device) -> wgpu::Buffer {
         device.create_buffer_init(
             &wgpu::util::BufferInitDescriptor {
@@ -93,7 +94,6 @@ impl Mesh {
             }
         )
     }
-    
     pub fn construct_index_buffer(&self, device: &Device) -> wgpu::Buffer {
         device.create_buffer_init(
             &wgpu::util::BufferInitDescriptor {
@@ -103,6 +103,7 @@ impl Mesh {
             }
         )
     }
+    
     pub fn transform_matrix_buffer_desc() -> wgpu::VertexBufferLayout<'static> {
         wgpu::VertexBufferLayout {
             array_stride: std::mem::size_of::<Vertex>() as wgpu::BufferAddress,
@@ -146,7 +147,7 @@ impl Mesh {
     }
     pub fn indices_buffer_desc() -> wgpu::VertexBufferLayout<'static> {
         wgpu::VertexBufferLayout {
-            array_stride: std::mem::size_of::<u16>() as wgpu::BufferAddress,
+            array_stride: std::mem::size_of::<IndicesSize>() as wgpu::BufferAddress,
             step_mode: wgpu::VertexStepMode::Vertex,
             attributes: &[
                 wgpu::VertexAttribute {

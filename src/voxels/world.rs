@@ -6,13 +6,15 @@ use crate::voxels::base_chunk::Chunk;
 use crate::voxels::chunk_cache::ChunkCacheManager;
 use crate::v3::{loose_less, loose_more_eq};
 use crate::voxels::world_file::FileManager;
-use crate::entities::{PlayerEntity};
+use crate::entities::player::{PlayerEntity};
 
 pub struct WorldManager {
     chunk_manager: ChunkCacheManager,
     file_manager: FileManager,
     player: PlayerEntity,
-    world_size: UVec3
+    world_size: UVec3,
+    // camera_buffer: wgpu::Buffer,
+    // camera_bind_group: wgpu::BindGroup,
 }
 impl WorldManager {
     pub fn new(render_distance_hor:u32,render_distance_ver:u32) -> Self {
@@ -23,6 +25,7 @@ impl WorldManager {
             world_size: UVec3 {x:128,y:128,z:64},
             player: PlayerEntity::new(
                 UVec3 {x:128,y:128,z:64}/2,
+                // UVec3 {x:0,y:0,z:0},
                 render_distance_hor,
                 render_distance_ver
             ),
@@ -36,7 +39,6 @@ impl WorldManager {
         {
             return;
         }
-
         let mut transform: Mat4 = Mat4::IDENTITY;
         transform.w_axis.x = self.player.chunk_pos.x as f32;
         transform.w_axis.y = self.player.chunk_pos.y as f32;
@@ -55,14 +57,17 @@ impl WorldManager {
         };
         println!("{} | {}",start,end);
         for x in start.x..=end.x {
-            // println!("hello");
             for y in start.y..=end.y {
                 for z in start.z..=end.z {
                     let index: UVec3 = UVec3 {x:x,y:y,z:z};
-                    if self.chunk_manager.chunk_present(&index) {
-                        let chunk: Chunk = self.file_manager.read_chunk(index).unwrap();
-                        self.chunk_manager.add_chunk(index, chunk);
+                    if !self.chunk_manager.chunk_present(&index) {
+                        // let chunk: Chunk = self.file_manager.read_chunk(index).unwrap();
+                        let chunk: Chunk = Chunk::default();
+                        self.chunk_manager.add_chunk(&index, chunk);
                     }
+                    else {
+                    }
+                        // println!("test");
                     self.chunk_manager.render_chunk(index,state);
                 }
             }

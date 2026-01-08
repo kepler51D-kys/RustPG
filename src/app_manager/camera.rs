@@ -1,40 +1,27 @@
-use glam::{Vec3,Quat,Mat4};
+use glam::{Vec3,Mat4};
 
 pub struct Camera {
-    pub position: Vec3,
-    pub rotation: Quat,
-    pub fov: f32,
+    pub eye: Vec3,
+    pub target: Vec3,
+    pub up: Vec3,
     pub aspect: f32,
-    
-    pub view_matrix: Mat4,
-    pub projection_matrix: Mat4,
+    pub fovy: f32,
+    pub znear: f32,
+    pub zfar: f32,
 }
 impl Camera {
-    pub fn update_matrices(&mut self) {
-        self.view_matrix = Mat4::look_to_rh(
-            self.position,
-            self.rotation * Vec3::NEG_Z,
-            Vec3::Y,
-        );
+    pub fn build_view_projection_matrix(&self) -> Mat4 {
         
-        self.projection_matrix = Mat4::perspective_rh(
-            self.fov.to_radians(),
+        let view = Mat4::look_at_rh(self.eye, self.target, self.up);
+        
+        // let proj = Mat4::perspective(cgmath::Deg(self.fovy), self.aspect, self.znear, self.zfar);
+        let proj: Mat4 = Mat4::perspective_rh( // note: might be left hand (lh) try both
+            self.fovy,
             self.aspect,
-            0.1,
-            100.0,
+            self.znear,
+            self.zfar
         );
-    }
-    pub fn new(fov: f32) -> Self {
-        Self {
-            position: Vec3::ZERO,
-            rotation: Quat::default(),
-            fov,
-            aspect: 16.0/9.0,
-            view_matrix: Mat4::ZERO,
-            projection_matrix: Mat4::ZERO,
-        }
+        // 3.
+        return proj * view;
     }
 }
-#[repr(C)]
-#[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
-struct CameraUniform(Mat4);

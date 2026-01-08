@@ -9,7 +9,7 @@ use crate::v3::get_block_index;
 use std::collections::HashMap;
 
 const COLOUR: Vec3 = Vec3 {x:1.0,y:0.0,z:1.0};
-
+pub type IndicesSize = u16;
 pub struct ChunkCacheManager {
     chunk_cache: HashMap<UVec3,Chunk>,
     cache_size: usize,
@@ -30,51 +30,59 @@ impl ChunkCacheManager {
     pub fn get_chunk(&self, index: UVec3) -> Option<&Chunk> {
         return self.chunk_cache.get(&index);
     }
-    pub fn add_chunk(&mut self, index: UVec3, chunk: Chunk) {
-        self.chunk_cache.insert(index, chunk);
+    pub fn add_chunk(&mut self, index: &UVec3, chunk: Chunk) {
+        self.chunk_cache.insert(*index, chunk);
+    }
+    fn base_render_chunk(&self, index: UVec3, state: &mut State) {
+        let err = state.render_vertices(&self.get_chunk(index).unwrap().mesh_cache);
+            match err {
+                Ok(_) => {}
+                // Reconfigure the surface if it's lost or outdated
+                Err(wgpu::SurfaceError::Lost | wgpu::SurfaceError::Outdated) => {
+                    let size = state.window.inner_size();
+                    state.resize(size.width, size.height);
+                }
+                Err(e) => {
+                    log::error!("Unable to render {}", e);
+                }
+            }
     }
     pub fn remove_chunk(&mut self, index: UVec3) {
         self.chunk_cache.remove(&index);
     }
     pub fn render_chunk(&mut self, index: UVec3, state: &mut State) {
         // let chunk: &Chunk = self.get_chunk(index).unwrap();
-        let chunk: &Chunk;
-        match self.get_chunk(index) {
-            Some(val) => {chunk = val;},
-            None => {return;}
-        }
-        println!("{}",chunk.mesh_length);
-        match chunk.state {
+        // let chunk: &Chunk;
+        // match self.get_chunk(index) {
+        //     Some(val) => {chunk = val;},
+        //     None => {return;}
+        // }
+        // println!("{}",chunk.mesh_length);
+        match self.get_chunk(index).unwrap().state {
             ChunkState::Invalid => {return;} // todo handle this
             ChunkState::Loading => {return;}
-            ChunkState::MeshDirty => {self.gen_cache(index);}
+            ChunkState::MeshDirty => {
+                self.gen_cache(index);
+                // println!("{}",self.get_chunk(index).unwrap().state as u32);
+                self.base_render_chunk(index, state);
+                return;
+            }
             ChunkState::Valid => {
                 // match &chunk.mesh_cache {
                     // Some(mesh) => {
-                        let err = state.render_vertices(&chunk.mesh_cache);
-                        match err {
-                            Ok(_) => {}
-                            // Reconfigure the surface if it's lost or outdated
-                            Err(wgpu::SurfaceError::Lost | wgpu::SurfaceError::Outdated) => {
-                                let size = state.window.inner_size();
-                                state.resize(size.width, size.height);
-                            }
-                            Err(e) => {
-                                log::error!("Unable to render {}", e);
-                            }
-                        }
+                    self.base_render_chunk(index, state);
                     // }
                 // }
             }
         }
     }
-    fn add_vertices(&self, quad: Quad,indices: &mut Vec<u16>, vertices: &mut Vec<Vertex>) {
-        for i in 0..3 {
+    fn add_vertices(&self, quad: Quad,indices: &mut Vec<IndicesSize>, vertices: &mut Vec<Vertex>) {
+        for i in 0..4 {
             vertices.push(quad.data[i]);
         }
-        indices.push(1);
-        indices.push(3);
         indices.push(0);
+        indices.push(3);
+        indices.push(1);
 
         indices.push(3);
         indices.push(2);
@@ -83,24 +91,22 @@ impl ChunkCacheManager {
     pub fn gen_cache(&mut self, chunk_index: UVec3) {
 
         let mut vertices:Vec<Vertex> = Vec::new();
-        let mut indices:Vec<u16> = Vec::new();
+        let mut indices:Vec<IndicesSize> = Vec::new();
 
         let chunk: &Chunk = self.get_chunk(chunk_index).unwrap();
-        // let mut mesh: Vec<Quad> = Vec::new();
-        let mut block_index: UVec3 = UVec3 {
-            x: CHUNKSIZE as u32 - 1,
-            y: CHUNKSIZE as u32 - 1,
-            z: CHUNKSIZE as u32 - 1
-        };
         let chunk_pos: Vec3 = Vec3 {
             x: chunk_index.x as f32*CHUNKSIZE as f32,
             y: chunk_index.y as f32*CHUNKSIZE as f32,
             z: chunk_index.z as f32*CHUNKSIZE as f32,
         };
-        // println!("hello");
         for x in 0..CHUNKSIZE {
             for y in 0..CHUNKSIZE {
                 for z in 0..CHUNKSIZE {
+                    let block_index: UVec3 = UVec3{
+                        x:x as u32,
+                        y:y as u32,
+                        z:z as u32,
+                    };
                     let block_pos: Vec3 = Vec3 {
                         x:x as f32,
                         y:y as f32,
@@ -108,42 +114,42 @@ impl ChunkCacheManager {
                     };
                     let skip: bool = chunk.data[get_block_index(block_index)] == BlockID::Air;
                     if !skip {
-                        if top_neighbour_solid(&self.chunk_cache,chunk_index, block_index) {
+                        if !top_neighbour_solid(&self.chunk_cache,chunk_index, block_index) {
                             let mut new_quad: Quad = TOP_QUAD;
                             for i in 0..4 {
                                 new_quad.data[i] += Vertex::from(block_pos) + Vertex::from(chunk_pos);
                             }
                             self.add_vertices(new_quad,&mut indices, &mut vertices);
                         }
-                        if bottom_neighbour_solid(&self.chunk_cache, chunk_index, block_index) {
+                        if !bottom_neighbour_solid(&self.chunk_cache, chunk_index, block_index) {
                             let mut new_quad: Quad = BOTTOM_QUAD;
                             for i in 0..4 {
                                 new_quad.data[i] += Vertex::from(block_pos) + Vertex::from(chunk_pos);
                             }
                             self.add_vertices(new_quad, &mut indices, &mut vertices);
                         }
-                        if left_neighbour_solid(&self.chunk_cache, chunk_index, block_index) {
+                        if !left_neighbour_solid(&self.chunk_cache, chunk_index, block_index) {
                             let mut new_quad: Quad = LEFT_QUAD;
                             for i in 0..4 {
                                 new_quad.data[i] += Vertex::from(block_pos) + Vertex::from(chunk_pos);
                             }
                             self.add_vertices(new_quad, &mut indices, &mut vertices);
                         }
-                        if right_neighbour_solid(&self.chunk_cache, chunk_index, block_index) {
+                        if !right_neighbour_solid(&self.chunk_cache, chunk_index, block_index) {
                             let mut new_quad: Quad = RIGHT_QUAD;
                             for i in 0..4 {
                                 new_quad.data[i] += Vertex::from(block_pos) + Vertex::from(chunk_pos);
                             }
                             self.add_vertices(new_quad, &mut indices, &mut vertices);
                         }
-                        if front_neighbour_solid(&self.chunk_cache, chunk_index, block_index) {
+                        if !front_neighbour_solid(&self.chunk_cache, chunk_index, block_index) {
                             let mut new_quad: Quad = FRONT_QUAD;
                             for i in 0..4 {
                                 new_quad.data[i] += Vertex::from(block_pos) + Vertex::from(chunk_pos);
                             }
                             self.add_vertices(new_quad, &mut indices, &mut vertices);
                         }
-                        if back_neighbour_solid(&self.chunk_cache, chunk_index, block_index) {
+                        if !back_neighbour_solid(&self.chunk_cache, chunk_index, block_index) {
                             let mut new_quad: Quad = BACK_QUAD;
                             for i in 0..4 {
                                 new_quad.data[i] += Vertex::from(block_pos) + Vertex::from(chunk_pos);
@@ -151,22 +157,21 @@ impl ChunkCacheManager {
                             self.add_vertices(new_quad, &mut indices, &mut vertices);
                         }
                     }
-                    
-                    block_index.y -= (block_index.x >= CHUNKSIZE as u32) as u32;
-                    block_index.x %= CHUNKSIZE as u32;
-                    block_index.z -= (block_index.y >= CHUNKSIZE as u32) as u32;
-                    block_index.y %= CHUNKSIZE as u32;
-                    block_index.x -= 1;
                 }
             }
-        }   
+        }
+        if vertices.len() > IndicesSize::max_value() as usize {
+            println!("mesh too large oh fuck: {}",vertices.len());
+        }
+        else if vertices.len() == 0 {
+            println!("mesh too small");
+        }
         let chunk: &mut Chunk = self.get_mut_chunk(chunk_index).unwrap();
         chunk.mesh_cache = Mesh {
             vertices,
             indices
         };
         chunk.state = ChunkState::Valid;
-        
     }
 }
 
@@ -187,10 +192,12 @@ fn top_neighbour_solid(chunk_cache: &HashMap<UVec3,Chunk>, mut chunk_index: UVec
     }
 }
 fn bottom_neighbour_solid(chunk_cache: &HashMap<UVec3,Chunk>, mut chunk_index: UVec3, mut block_index: UVec3) -> bool {
-    block_index.y -= 1;
+    // block_index.y -= 1;
+    block_index.y = block_index.y.wrapping_sub(1);
     if block_index.y >= CHUNKSIZE as u32 {
         block_index.y = CHUNKSIZE as u32 - 1;
-        chunk_index.y -= 1;
+        // chunk_index.y -= 1;
+        chunk_index.y = chunk_index.y.wrapping_sub(1);
     }
     if chunk_index.y >= WORLDSIZE {
         return false;
@@ -219,10 +226,12 @@ fn right_neighbour_solid(chunk_cache: &HashMap<UVec3,Chunk>, mut chunk_index: UV
     }
 }
 fn left_neighbour_solid(chunk_cache: &HashMap<UVec3,Chunk>, mut chunk_index: UVec3, mut block_index: UVec3) -> bool {
-    block_index.x -= 1;
+    // block_index.x -= 1;
+    block_index.x = block_index.x.wrapping_sub(1);
     if block_index.x >= CHUNKSIZE as u32 {
         block_index.x = CHUNKSIZE as u32 - 1;
-        chunk_index.x -= 1;
+        // chunk_index.x -= 1;
+        chunk_index.x = chunk_index.x.wrapping_sub(1);
     }
     if chunk_index.x >= WORLDSIZE {
         return false;
@@ -251,10 +260,12 @@ fn front_neighbour_solid(chunk_cache: &HashMap<UVec3,Chunk>, mut chunk_index: UV
     }
 }
 fn back_neighbour_solid(chunk_cache: &HashMap<UVec3,Chunk>, mut chunk_index: UVec3, mut block_index: UVec3) -> bool {
-    block_index.z -= 1;
+    // block_index.z -= 1;
+    block_index.z = block_index.z.wrapping_sub(1);
     if block_index.z >= CHUNKSIZE as u32 {
         block_index.z = CHUNKSIZE as u32 - 1;
-        chunk_index.z -= 1;
+        // chunk_index.z -= 1;
+        chunk_index.z = chunk_index.z.wrapping_sub(1);
     }
     if chunk_index.z >= WORLDSIZE {
         return false;

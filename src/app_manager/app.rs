@@ -1,7 +1,6 @@
 use std::sync::Arc;
-use crate::{app_manager::{camera::Camera}, voxels::world::WorldManager};
+use crate::{app_manager::{mesh::{Mesh, Vertex}}, voxels::{chunk_cache::IndicesSize, world::WorldManager}};
 
-// use wgpu::util::DeviceExt;
 use winit::{
     application::ApplicationHandler,
     event::{KeyEvent, WindowEvent},
@@ -12,19 +11,19 @@ use winit::{
 
 use crate::app_manager::window::State;
 
-// const VERT_TEST: &[Vertex] = &[
-//     Vertex {pos:[-0.5,-0.5,0.0]},
-//     Vertex {pos:[0.5,-0.5,0.0]},
-//     Vertex {pos:[-0.5,0.5,0.0]},
-//     Vertex {pos:[0.5,0.5,0.0]},
-// ];
-// const IND_TEST: &[u16] = &[
-//     3,2,0,1,3,0
-// ];
+const VERT_TEST: &[Vertex] = &[
+    Vertex {pos:[-0.5,-0.5,0.0]},
+    Vertex {pos:[0.5,-0.5,0.0]},
+    Vertex {pos:[-0.5,0.5,0.0]},
+    Vertex {pos:[0.5,0.5,0.0]},
+];
+const IND_TEST: &[IndicesSize] = &[
+    3,2,0,1,3,0
+];
 pub struct App {
     pub state: Option<State>,
     pub world_manager: WorldManager,
-    pub camera: Camera
+    // pub camera: Camera
 }
 
 impl App {
@@ -32,7 +31,7 @@ impl App {
         Self {
             world_manager: WorldManager::new(1,1),
             state: None,
-            camera: Camera::new(90.0),
+            // camera: Camera::new(90.0),
         }
     }
 }
@@ -62,13 +61,6 @@ impl ApplicationHandler<State> for App {
             Some(canvas) => canvas,
             None => return,
         };
-        // let vertex_buffer = state.device.create_buffer_init(
-        //     &wgpu::util::BufferInitDescriptor {
-        //         label: Some("Vertex Buffer"),
-        //         contents: bytemuck::cast_slice(VERT_TEST),
-        //         usage: wgpu::BufferUsages::VERTEX,
-        //     }
-        // );
         match event {
             // ...
             WindowEvent::KeyboardInput {
@@ -82,18 +74,18 @@ impl ApplicationHandler<State> for App {
             } => state.handle_key(event_loop, code, key_state.is_pressed()),
             WindowEvent::RedrawRequested => {
                 state.update();
-                self.world_manager.render_world(state);
-                // match state.render_vertices(&Mesh {vertices:VERT_TEST.to_vec(),indices:IND_TEST.to_vec()}) {
-                //     Ok(_) => {}
-                //     // Reconfigure the surface if it's lost or outdated
-                //     Err(wgpu::SurfaceError::Lost | wgpu::SurfaceError::Outdated) => {
-                //         let size = state.window.inner_size();
-                //         state.resize(size.width, size.height);
-                //     }
-                //     Err(e) => {
-                //         log::error!("Unable to render {}", e);
-                //     }
-                // }
+                // self.world_manager.render_world(state);
+                match state.render_vertices(&Mesh {vertices:VERT_TEST.to_vec(),indices:IND_TEST.to_vec()}) {
+                    Ok(_) => {}
+                    // Reconfigure the surface if it's lost or outdated
+                    Err(wgpu::SurfaceError::Lost | wgpu::SurfaceError::Outdated) => {
+                        let size = state.window.inner_size();
+                        state.resize(size.width, size.height);
+                    }
+                    Err(e) => {
+                        log::error!("Unable to render {}", e);
+                    }
+                }
             }
             _ => {}
         }

@@ -5,16 +5,16 @@ pub const CHUNKSIZE: usize = 16;
 pub const CHUNKLEN: usize = CHUNKSIZE*CHUNKSIZE*CHUNKSIZE;
 
 #[repr(u8)]
+#[derive(Copy,Clone)]
 pub enum ChunkState {
     Invalid,
     Loading,
     MeshDirty,
     Valid,
 }
-
+#[derive(Clone)]
 pub struct Chunk {
     pub mesh_cache: Mesh,
-    pub mesh_length: u32,
     pub data: [BlockID; CHUNKLEN],
     pub state: ChunkState,
 }
@@ -22,10 +22,9 @@ pub struct Chunk {
 impl Default for Chunk {
     fn default() -> Self {
         return Self {
-            mesh_length: 0,
             mesh_cache: Mesh::new(),
             data: [BlockID::Stone; CHUNKLEN],
-            state: ChunkState::Invalid,
+            state: ChunkState::MeshDirty, // this is bad fix fix fix
         }
     }
 }
