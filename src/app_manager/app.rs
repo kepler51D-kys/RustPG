@@ -29,7 +29,7 @@ pub struct App {
 impl App {
     pub fn new() -> Self {
         Self {
-            world_manager: WorldManager::new(1,1),
+            world_manager: WorldManager::new(0,0),
             state: None,
             // camera: Camera::new(90.0),
         }
@@ -74,6 +74,10 @@ impl ApplicationHandler<State> for App {
             } => state.handle_key(event_loop, code, key_state.is_pressed()),
             WindowEvent::RedrawRequested => {
                 state.update();
+                // state.cam.eye.x += 0.001;
+                // state.cam.target.x += 0.001;
+                // state.camera_uniform = state.cam.build_view_projection_matrix();
+                // state.queue.write_buffer(&state.camera_buffer, 0, bytemuck::cast_slice(&[state.camera_uniform]));
                 // self.world_manager.render_world(state);
                 match state.render_vertices(&Mesh {vertices:VERT_TEST.to_vec(),indices:IND_TEST.to_vec()}) {
                     Ok(_) => {}

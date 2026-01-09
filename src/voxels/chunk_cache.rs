@@ -9,7 +9,7 @@ use crate::v3::get_block_index;
 use std::collections::HashMap;
 
 const COLOUR: Vec3 = Vec3 {x:1.0,y:0.0,z:1.0};
-pub type IndicesSize = u16;
+pub type IndicesSize = u32;
 pub struct ChunkCacheManager {
     chunk_cache: HashMap<UVec3,Chunk>,
     cache_size: usize,
@@ -34,6 +34,10 @@ impl ChunkCacheManager {
         self.chunk_cache.insert(*index, chunk);
     }
     fn base_render_chunk(&self, index: UVec3, state: &mut State) {
+        // for x in &self.get_chunk(index).unwrap().mesh_cache.vertices {
+        //     print!("{} {} {} : ",x.pos[0],x.pos[1],x.pos[2]);
+        // }
+        println!("l");
         let err = state.render_vertices(&self.get_chunk(index).unwrap().mesh_cache);
             match err {
                 Ok(_) => {}
@@ -51,19 +55,12 @@ impl ChunkCacheManager {
         self.chunk_cache.remove(&index);
     }
     pub fn render_chunk(&mut self, index: UVec3, state: &mut State) {
-        // let chunk: &Chunk = self.get_chunk(index).unwrap();
-        // let chunk: &Chunk;
-        // match self.get_chunk(index) {
-        //     Some(val) => {chunk = val;},
-        //     None => {return;}
-        // }
-        // println!("{}",chunk.mesh_length);
+        
         match self.get_chunk(index).unwrap().state {
             ChunkState::Invalid => {return;} // todo handle this
             ChunkState::Loading => {return;}
             ChunkState::MeshDirty => {
                 self.gen_cache(index);
-                // println!("{}",self.get_chunk(index).unwrap().state as u32);
                 self.base_render_chunk(index, state);
                 return;
             }
@@ -77,16 +74,17 @@ impl ChunkCacheManager {
         }
     }
     fn add_vertices(&self, quad: Quad,indices: &mut Vec<IndicesSize>, vertices: &mut Vec<Vertex>) {
+        let indices_address_start: IndicesSize = vertices.len() as IndicesSize;
         for i in 0..4 {
             vertices.push(quad.data[i]);
         }
-        indices.push(0);
-        indices.push(3);
-        indices.push(1);
+        indices.push(indices_address_start+0);
+        indices.push(indices_address_start+3);
+        indices.push(indices_address_start+1);
 
-        indices.push(3);
-        indices.push(2);
-        indices.push(0);
+        indices.push(indices_address_start+0);
+        indices.push(indices_address_start+2);
+        indices.push(indices_address_start+3);
     }
     pub fn gen_cache(&mut self, chunk_index: UVec3) {
 

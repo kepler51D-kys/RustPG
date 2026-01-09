@@ -1,6 +1,6 @@
 use std::cmp::{min,max};
 
-use glam::{UVec3,Mat4};
+use glam::{UVec3, Vec3};
 use crate::app_manager::window::State;
 use crate::voxels::base_chunk::Chunk;
 use crate::voxels::chunk_cache::ChunkCacheManager;
@@ -24,7 +24,7 @@ impl WorldManager {
             ),
             world_size: UVec3 {x:128,y:128,z:64},
             player: PlayerEntity::new(
-                UVec3 {x:128,y:128,z:64}/2,
+                Vec3 {x:1280.0,y:1280.0,z:640.0}/2.0,
                 // UVec3 {x:0,y:0,z:0},
                 render_distance_hor,
                 render_distance_ver
@@ -33,29 +33,32 @@ impl WorldManager {
         }
     }
     pub fn render_world(&mut self, state: &mut State) {
-        if 
-            loose_more_eq(self.player.chunk_pos, self.world_size) ||
-            loose_less(self.player.chunk_pos, UVec3::ZERO)
+        if
+            loose_more_eq(self.player.get_chunk_pos(), self.world_size) ||
+            loose_less(self.player.get_chunk_pos(), UVec3::ZERO)
         {
             return;
         }
-        let mut transform: Mat4 = Mat4::IDENTITY;
-        transform.w_axis.x = self.player.chunk_pos.x as f32;
-        transform.w_axis.y = self.player.chunk_pos.y as f32;
-        transform.w_axis.z = self.player.chunk_pos.z as f32;
-        
+        self.player.pos.y += 0.1;
+        state.cam.eye = self.player.pos;
+        state.cam.eye.y += 50.0;
+        state.cam.target = self.player.pos;
+        state.cam.camera_uniform = state.cam.build_view_projection_matrix();
+        state.queue.write_buffer(&state.cam.camera_buffer, 0, bytemuck::cast_slice(&[state.cam.camera_uniform]));
+
         // init both bounds
         let start: UVec3 = UVec3 {
-            x: max(min(self.player.chunk_pos.x-self.player.render_distance_hor, self.world_size.x-1),0),
-            y: max(min(self.player.chunk_pos.y-self.player.render_distance_ver, self.world_size.y-1),0),
-            z: max(min(self.player.chunk_pos.z-self.player.render_distance_hor, self.world_size.z-1),0),
+            x: max(min(self.player.get_chunk_pos().x-self.player.render_distance_hor, self.world_size.x-1),0),
+            y: max(min(self.player.get_chunk_pos().y-self.player.render_distance_ver, self.world_size.y-1),0),
+            z: max(min(self.player.get_chunk_pos().z-self.player.render_distance_hor, self.world_size.z-1),0),
         };
         let end: UVec3 = UVec3 {
-            x: max(min(self.player.chunk_pos.x+self.player.render_distance_hor, self.world_size.x-1),0),
-            y: max(min(self.player.chunk_pos.y+self.player.render_distance_ver, self.world_size.y-1),0),
-            z: max(min(self.player.chunk_pos.z+self.player.render_distance_hor, self.world_size.z-1),0),
+            x: max(min(self.player.get_chunk_pos().x+self.player.render_distance_hor, self.world_size.x-1),0),
+            y: max(min(self.player.get_chunk_pos().y+self.player.render_distance_ver, self.world_size.y-1),0),
+            z: max(min(self.player.get_chunk_pos().z+self.player.render_distance_hor, self.world_size.z-1),0),
         };
-        println!("{} | {}",start,end);
+        println!("{}",state.cam.target);
+        // println!("{} | {}",start,end);
         for x in start.x..=end.x {
             for y in start.y..=end.y {
                 for z in start.z..=end.z {
@@ -67,7 +70,6 @@ impl WorldManager {
                     }
                     else {
                     }
-                        // println!("test");
                     self.chunk_manager.render_chunk(index,state);
                 }
             }

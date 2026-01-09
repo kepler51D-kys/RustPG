@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+mod advanced_rendering;
 mod entities;
 mod v3;
 mod voxels;
