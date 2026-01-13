@@ -1,7 +1,7 @@
 use glam::{UVec3,Vec3};
 
 use crate::app_manager::mesh::{Mesh, Vertex};
-use crate::app_manager::window::State;
+use crate::app_manager::state::State;
 use crate::voxels::base_voxel::{BlockID, WORLDSIZE};
 use crate::voxels::base_chunk::{CHUNKSIZE, Chunk,ChunkState};
 use crate::voxels::base_render::{BACK_QUAD, BOTTOM_QUAD, FRONT_QUAD, LEFT_QUAD, Quad, RIGHT_QUAD, TOP_QUAD};
@@ -37,7 +37,7 @@ impl ChunkCacheManager {
         // for x in &self.get_chunk(index).unwrap().mesh_cache.vertices {
         //     print!("{} {} {} : ",x.pos[0],x.pos[1],x.pos[2]);
         // }
-        println!("l");
+        // println!("l");
         let err = state.render_vertices(&self.get_chunk(index).unwrap().mesh_cache);
             match err {
                 Ok(_) => {}

@@ -1,13 +1,16 @@
 use std::cmp::{min,max};
+use std::process;
 
 use glam::{UVec3, Vec3};
-use crate::app_manager::window::State;
+use crate::app_manager::mesh::Mesh;
+use crate::app_manager::state::State;
 use crate::voxels::base_chunk::Chunk;
 use crate::voxels::chunk_cache::ChunkCacheManager;
-use crate::v3::{loose_less, loose_more_eq};
+use crate::v3::{length, loose_less, loose_more_eq};
 use crate::voxels::world_file::FileManager;
 use crate::entities::player::{PlayerEntity};
 
+static mut thing: bool = false;
 pub struct WorldManager {
     chunk_manager: ChunkCacheManager,
     file_manager: FileManager,
@@ -39,12 +42,13 @@ impl WorldManager {
         {
             return;
         }
-        self.player.pos.y += 0.1;
-        state.cam.eye = self.player.pos;
-        state.cam.eye.y += 50.0;
-        state.cam.target = self.player.pos;
-        state.cam.camera_uniform = state.cam.build_view_projection_matrix();
-        state.queue.write_buffer(&state.cam.camera_buffer, 0, bytemuck::cast_slice(&[state.cam.camera_uniform]));
+        // self.player.pos.z -= 0.2;
+        // state.cam.eye = -self.player.pos;
+        // state.cam.eye.y += 50.0;
+        // state.cam.target = self.player.pos;
+        // state.cam.target.z += 50.0;
+        // state.cam.camera_uniform = state.cam.build_view_projection_matrix();
+        // state.queue.write_buffer(&state.cam.camera_buffer, 0, bytemuck::cast_slice(&[state.cam.camera_uniform]));
 
         // init both bounds
         let start: UVec3 = UVec3 {
@@ -57,7 +61,7 @@ impl WorldManager {
             y: max(min(self.player.get_chunk_pos().y+self.player.render_distance_ver, self.world_size.y-1),0),
             z: max(min(self.player.get_chunk_pos().z+self.player.render_distance_hor, self.world_size.z-1),0),
         };
-        println!("{}",state.cam.target);
+        // println!("{}|||",state.cam.target);
         // println!("{} | {}",start,end);
         for x in start.x..=end.x {
             for y in start.y..=end.y {
@@ -69,6 +73,31 @@ impl WorldManager {
                         self.chunk_manager.add_chunk(&index, chunk);
                     }
                     else {
+                    }
+                    let mesh: &Mesh = &self.chunk_manager.get_chunk(index).unwrap().mesh_cache;
+                    println!("{}\n---------------",self.player.pos);
+                    for i in 0..mesh.vertices.len() {
+                        if length(mesh.vertices[i].to_vec3()-self.player.pos) < 1.0 {
+                            // println!("{} : {} {} {}",i,
+                            //     mesh.vertices[i].pos[0],
+                            //     mesh.vertices[i].pos[1],
+                            //     mesh.vertices[i].pos[2],
+                            // );
+                            // println!("{}",mesh.vertices[i].to_vec3());
+                        }
+                        // println!("{} {} {}",
+                        //     mesh.vertices[i].pos[0],
+                            // mesh.vertices[i].pos[1],
+                        //     mesh.vertices[i].pos[2],
+                        // );
+                        println!("{}",mesh.vertices[i].to_vec3());
+                    }
+                    // println!("-----------------");
+                    unsafe {
+                        if thing {
+                            process::exit(0);
+                        }
+                        thing = true;
                     }
                     self.chunk_manager.render_chunk(index,state);
                 }

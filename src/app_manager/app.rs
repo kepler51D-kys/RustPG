@@ -9,17 +9,31 @@ use winit::{
     window::{Window}
 };
 
-use crate::app_manager::window::State;
+use crate::app_manager::state::State;
 
 const VERT_TEST: &[Vertex] = &[
-    Vertex {pos:[-0.5,-0.5,0.0]},
-    Vertex {pos:[0.5,-0.5,0.0]},
-    Vertex {pos:[-0.5,0.5,0.0]},
-    Vertex {pos:[0.5,0.5,0.0]},
+    Vertex {pos:[-0.8,-0.4,0.0], texture_coord: [1.0,1.0]},
+    Vertex {pos:[-0.8,0.4,0.0], texture_coord: [1.0,0.0]},
+    Vertex {pos:[0.8,-0.4,0.0], texture_coord: [0.0,1.0]},
+    Vertex {pos:[0.8,0.4,0.0], texture_coord: [0.0,0.0]},
 ];
 const IND_TEST: &[IndicesSize] = &[
-    3,2,0,1,3,0
+    3,1,0,
+    0,2,3,
 ];
+
+// const VERT_TEST: &[Vertex] = &[
+//     Vertex {pos:[0.588,-0.809,0.0], texture_coord: [1.0,1.0]},
+//     Vertex {pos:[-0.951,0.309,0.0], texture_coord: [0.3,1.0]},
+//     Vertex {pos:[0.951,0.309,0.0], texture_coord: [1.0,0.5]},
+//     Vertex {pos:[-0.588,-0.809,0.0], texture_coord: [1.0,0.5]},
+//     Vertex {pos:[0.0,1.0,0.0], texture_coord: [0.5,1.0]},
+// ];
+// const IND_TEST: &[IndicesSize] = &[
+//     0,2,4,
+//     4,1,3,
+//     3,0,4,
+// ];
 pub struct App {
     pub state: Option<State>,
     pub world_manager: WorldManager,
@@ -56,6 +70,7 @@ impl ApplicationHandler<State> for App {
         _window_id: winit::window::WindowId,
         event: WindowEvent,
     ) {
+        // println!("frame");
         // println!("hello");
         let state = match &mut self.state {
             Some(canvas) => canvas,
@@ -74,10 +89,10 @@ impl ApplicationHandler<State> for App {
             } => state.handle_key(event_loop, code, key_state.is_pressed()),
             WindowEvent::RedrawRequested => {
                 state.update();
-                // state.cam.eye.x += 0.001;
-                // state.cam.target.x += 0.001;
-                // state.camera_uniform = state.cam.build_view_projection_matrix();
-                // state.queue.write_buffer(&state.camera_buffer, 0, bytemuck::cast_slice(&[state.camera_uniform]));
+                state.cam.eye.y += 0.0005;
+                // state.cam.target.y += 0.001;
+                state.cam.build_view_projection_matrix();
+                state.queue.write_buffer(&state.cam.camera_buffer, 0, bytemuck::cast_slice(&[state.cam.camera_uniform]));
                 // self.world_manager.render_world(state);
                 match state.render_vertices(&Mesh {vertices:VERT_TEST.to_vec(),indices:IND_TEST.to_vec()}) {
                     Ok(_) => {}

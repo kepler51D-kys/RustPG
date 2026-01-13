@@ -1,12 +1,10 @@
 use std::sync::Arc;
 
-// use glam::{Mat4, Vec3};
-// use wgpu::util::DeviceExt;
 use winit::{
     event_loop::{ActiveEventLoop}, keyboard::{KeyCode}, window::Window
 };
 
-use crate::app_manager::{camera::Camera, mesh::Mesh};
+use crate::{advanced_rendering::texture::TextureState, app_manager::{camera::Camera, mesh::Mesh}};
 
 pub struct State {
     pub surface: wgpu::Surface<'static>,
@@ -18,9 +16,7 @@ pub struct State {
     pub window: Arc<Window>,
 
     pub cam: Camera,
-    // pub camera_buffer: wgpu::Buffer,
-    // pub camera_bind_group: wgpu::BindGroup,
-    // pub camera_uniform: Mat4,
+    pub texture_state: TextureState,
 }
 impl State {
     pub fn update(&mut self) {
@@ -68,22 +64,49 @@ impl State {
             view_formats: vec![],
             desired_maximum_frame_latency: 2,
         };
-        let camera: Camera = Camera::new(&device,&config,&queue); 
-        let camera_bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            entries: &[
-                wgpu::BindGroupLayoutEntry {
-                    binding: 0,
-                    visibility: wgpu::ShaderStages::VERTEX,
-                    ty: wgpu::BindingType::Buffer {
-                        ty: wgpu::BufferBindingType::Uniform,
-                        has_dynamic_offset: false,
-                        min_binding_size: None,
+        let camera_bind_group_layout = 
+            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                entries: &[
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 0,
+                        visibility: wgpu::ShaderStages::VERTEX,
+                        ty: wgpu::BindingType::Buffer {
+                            ty: wgpu::BufferBindingType::Uniform,
+                            has_dynamic_offset: false,
+                            min_binding_size: None,
+                        },
+                        count: None,
+                    }
+                ],
+                label: Some("camera_bind_group_layout"),
+            });
+        let texture_bind_group_layout =
+            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                entries: &[
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 0,
+                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        ty: wgpu::BindingType::Texture {
+                            multisampled: false,
+                            view_dimension: wgpu::TextureViewDimension::D2,
+                            sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                        },
+                        count: None,
                     },
-                    count: None,
-                }
-            ],
-            label: Some("camera_bind_group_layout"),
-        });
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 1,
+                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        // This should match the filterable field of the
+                        // corresponding Texture entry above.
+                        ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                        count: None,
+                    },
+                ],
+                label: Some("texture_bind_group_layout"),
+            });
+        let texture_state: TextureState = TextureState::new(&device,&queue, &texture_bind_group_layout);
+        let camera: Camera = Camera::new(&device,&config,&queue,&camera_bind_group_layout);
+
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Shader"),
             source: wgpu::ShaderSource::Wgsl(include_str!("../shaders/test.wgsl").into()),
@@ -91,7 +114,7 @@ impl State {
         let render_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Render Pipeline Layout"),
-                bind_group_layouts: &[&camera_bind_group_layout],
+                bind_group_layouts: &[&camera_bind_group_layout, &texture_bind_group_layout],
                 push_constant_ranges: &[],
             });
 
@@ -139,9 +162,7 @@ impl State {
         });
         surface.configure(&device, &config);
         Ok(Self {
-            // camera_uniform,
-            // camera_bind_group,
-            // camera_buffer,
+            texture_state,
             cam:camera,
             render_pipeline,
             surface,
@@ -167,10 +188,9 @@ impl State {
             _ => {}
         }
     }
-
     pub fn render_vertices(&mut self, mesh: &Mesh) -> Result<(), wgpu::SurfaceError> {
-        // assumes vertex is a buffer of Vertex.
         self.window.request_redraw();
+        // println!("drawing thingy");
 
         // We can't render unless the surface is configured
         if !self.is_surface_configured {
@@ -210,6 +230,7 @@ impl State {
             });
             render_pass.set_pipeline(&self.render_pipeline);
             
+            render_pass.set_bind_group(1, &self.texture_state.diffuse_bind_group, &[]);
             render_pass.set_bind_group(0, &self.cam.camera_bind_group, &[]);
             render_pass.set_vertex_buffer(0, mesh.construct_vertex_buffer(&self.device).slice(..));
             render_pass.set_index_buffer(mesh.construct_index_buffer(&self.device).slice(..),wgpu::IndexFormat::Uint32);

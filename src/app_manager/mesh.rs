@@ -8,7 +8,17 @@ use crate::voxels::chunk_cache::IndicesSize;
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct Vertex {
-    pub pos: [f32; 3]
+    pub pos: [f32; 3],
+    pub texture_coord: [f32; 2],
+}
+impl Vertex {
+    pub fn to_vec3(&self) -> Vec3 {
+        Vec3 {
+            x:self.pos[0],
+            y:self.pos[1],
+            z:self.pos[2],
+        }
+    }
 }
 impl From<Vec3> for Vertex {
     fn from(value: Vec3) -> Self {
@@ -17,6 +27,10 @@ impl From<Vec3> for Vertex {
                 value.x,
                 value.y,
                 value.z,
+            ],
+            texture_coord: [
+                1.0,
+                1.0,
             ]
         }
     }
@@ -30,7 +44,8 @@ impl Add for Vertex {
                 self.pos[0] + rhs.pos[0],
                 self.pos[1] + rhs.pos[1],
                 self.pos[2] + rhs.pos[2],
-            ]
+            ],
+            texture_coord: self.texture_coord,
         }
     }
 }
@@ -43,7 +58,8 @@ impl Sub for Vertex {
                 self.pos[0] - rhs.pos[0],
                 self.pos[1] - rhs.pos[1],
                 self.pos[2] - rhs.pos[2],
-            ]
+            ],
+            texture_coord: self.texture_coord,
         }
     }
 }
@@ -76,15 +92,6 @@ impl Mesh {
             indices: Vec::new(),
         }
     }
-    pub fn construct_transform_matrix_buffer(&self, device: &wgpu::Device, transform: Mat4) -> wgpu::Buffer {
-        device.create_buffer_init(
-            &wgpu::util::BufferInitDescriptor {
-                label: Some("Mesh Uniform Buffer"),
-                contents: bytemuck::cast_slice(&[transform]),
-                usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
-            }
-        )
-    }
     pub fn construct_vertex_buffer(&self, device: &Device) -> wgpu::Buffer {
         device.create_buffer_init(
             &wgpu::util::BufferInitDescriptor {
@@ -104,34 +111,6 @@ impl Mesh {
         )
     }
     
-    pub fn transform_matrix_buffer_desc() -> wgpu::VertexBufferLayout<'static> {
-        wgpu::VertexBufferLayout {
-            array_stride: std::mem::size_of::<Vertex>() as wgpu::BufferAddress,
-            step_mode: wgpu::VertexStepMode::Instance,
-            attributes: &[
-                wgpu::VertexAttribute {
-                    offset: 0,
-                    shader_location: 0,
-                    format: wgpu::VertexFormat::Float32x4,
-                },
-                wgpu::VertexAttribute {
-                    offset: 1,
-                    shader_location: 0,
-                    format: wgpu::VertexFormat::Float32x4,
-                },
-                wgpu::VertexAttribute {
-                    offset: 2,
-                    shader_location: 0,
-                    format: wgpu::VertexFormat::Float32x4,
-                },
-                wgpu::VertexAttribute {
-                    offset: 3,
-                    shader_location: 0,
-                    format: wgpu::VertexFormat::Float32x4,
-                },
-            ]
-        }
-    }
     pub fn vertex_buffer_desc() -> wgpu::VertexBufferLayout<'static> {
         wgpu::VertexBufferLayout {
             array_stride: std::mem::size_of::<Vertex>() as wgpu::BufferAddress,
@@ -142,18 +121,10 @@ impl Mesh {
                     shader_location: 0,
                     format: wgpu::VertexFormat::Float32x3,
                 },
-            ]
-        }
-    }
-    pub fn indices_buffer_desc() -> wgpu::VertexBufferLayout<'static> {
-        wgpu::VertexBufferLayout {
-            array_stride: std::mem::size_of::<IndicesSize>() as wgpu::BufferAddress,
-            step_mode: wgpu::VertexStepMode::Vertex,
-            attributes: &[
                 wgpu::VertexAttribute {
-                    offset: 0,
-                    shader_location: 0,
-                    format: wgpu::VertexFormat::Uint16,
+                    offset: std::mem::size_of::<[f32; 3]>() as wgpu::BufferAddress,
+                    shader_location: 1,
+                    format: wgpu::VertexFormat::Float32x2,
                 },
             ]
         }

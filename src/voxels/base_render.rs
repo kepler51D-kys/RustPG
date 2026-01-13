@@ -6,38 +6,38 @@ pub struct Quad {
 }
 pub const RENDER_DISTANCE: u32 = 8;
 pub const TOP_QUAD: Quad = Quad {data: [
-    Vertex {pos:[0.0,1.0,1.0]},
-    Vertex {pos:[1.0,1.0,1.0]},
-    Vertex {pos:[1.0,1.0,0.0]},
-    Vertex {pos:[0.0,1.0,0.0]}
+    Vertex {pos:[0.0,1.0,1.0], texture_coord: [0.0,1.0]},
+    Vertex {pos:[1.0,1.0,1.0], texture_coord: [0.0,1.0]},
+    Vertex {pos:[1.0,1.0,0.0], texture_coord: [0.0,1.0]},
+    Vertex {pos:[0.0,1.0,0.0], texture_coord: [0.0,1.0]}
 ]};
 pub const BOTTOM_QUAD: Quad = Quad {data: [
-    Vertex {pos:[0.0,0.0,1.0]},
-    Vertex {pos:[1.0,0.0,1.0]},
-    Vertex {pos:[1.0,0.0,0.0]},
-    Vertex {pos:[0.0,0.0,0.0]}
+    Vertex {pos:[0.0,0.0,1.0], texture_coord: [0.0,1.0]},
+    Vertex {pos:[1.0,0.0,1.0], texture_coord: [0.0,1.0]},
+    Vertex {pos:[1.0,0.0,0.0], texture_coord: [0.0,1.0]},
+    Vertex {pos:[0.0,0.0,0.0], texture_coord: [0.0,1.0]}
 ]};
 pub const LEFT_QUAD: Quad = Quad {data: [
-    Vertex {pos:[0.0,0.0,0.0]},
-    Vertex {pos:[0.0,0.0,1.0]},
-    Vertex {pos:[0.0,1.0,1.0]},
-    Vertex {pos:[0.0,1.0,0.0]}
+    Vertex {pos:[0.0,0.0,0.0], texture_coord: [0.0,1.0]},
+    Vertex {pos:[0.0,0.0,1.0], texture_coord: [0.0,1.0]},
+    Vertex {pos:[0.0,1.0,1.0], texture_coord: [0.0,1.0]},
+    Vertex {pos:[0.0,1.0,0.0], texture_coord: [0.0,1.0]}
 ]};
 pub const RIGHT_QUAD: Quad = Quad {data: [
-    Vertex {pos:[1.0,0.0,0.0]},
-    Vertex {pos:[1.0,0.0,1.0]},
-    Vertex {pos:[1.0,1.0,1.0]},
-    Vertex {pos:[1.0,1.0,0.0]}
+    Vertex {pos:[1.0,0.0,0.0], texture_coord: [0.0,1.0]},
+    Vertex {pos:[1.0,0.0,1.0], texture_coord: [0.0,1.0]},
+    Vertex {pos:[1.0,1.0,1.0], texture_coord: [0.0,1.0]},
+    Vertex {pos:[1.0,1.0,0.0], texture_coord: [0.0,1.0]}
 ]};
 pub const BACK_QUAD: Quad = Quad {data: [
-    Vertex {pos:[0.0,0.0,0.0]},
-    Vertex {pos:[1.0,0.0,0.0]},
-    Vertex {pos:[1.0,1.0,0.0]},
-    Vertex {pos:[0.0,1.0,0.0]}
+    Vertex {pos:[0.0,0.0,0.0], texture_coord: [0.0,1.0]},
+    Vertex {pos:[1.0,0.0,0.0], texture_coord: [0.0,1.0]},
+    Vertex {pos:[1.0,1.0,0.0], texture_coord: [0.0,1.0]},
+    Vertex {pos:[0.0,1.0,0.0], texture_coord: [0.0,1.0]}
 ]};
 pub const FRONT_QUAD: Quad = Quad {data: [
-    Vertex {pos:[0.0,0.0,1.0]},
-    Vertex {pos:[1.0,0.0,1.0]},
-    Vertex {pos:[1.0,1.0,1.0]},
-    Vertex {pos:[0.0,1.0,1.0]}
+    Vertex {pos:[0.0,0.0,1.0], texture_coord: [0.0,1.0]},
+    Vertex {pos:[1.0,0.0,1.0], texture_coord: [0.0,1.0]},
+    Vertex {pos:[1.0,1.0,1.0], texture_coord: [0.0,1.0]},
+    Vertex {pos:[0.0,1.0,1.0], texture_coord: [0.0,1.0]}
 ]};

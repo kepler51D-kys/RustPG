@@ -1,5 +1,5 @@
 use glam::{Vec3,Mat4};
-use wgpu::{Device, Queue, SurfaceConfiguration, util::DeviceExt};
+use wgpu::{BindGroupLayout, Device, Queue, SurfaceConfiguration, util::DeviceExt};
 
 pub struct Camera {
     pub eye: Vec3,
@@ -15,22 +15,12 @@ pub struct Camera {
     pub camera_uniform: Mat4,
 }
 impl Camera {
-    pub fn new(device: &Device,config: &SurfaceConfiguration, queue: &Queue) -> Self {
-        let camera_bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            entries: &[
-                wgpu::BindGroupLayoutEntry {
-                    binding: 0,
-                    visibility: wgpu::ShaderStages::VERTEX,
-                    ty: wgpu::BindingType::Buffer {
-                        ty: wgpu::BufferBindingType::Uniform,
-                        has_dynamic_offset: false,
-                        min_binding_size: None,
-                    },
-                    count: None,
-                }
-            ],
-            label: Some("camera_bind_group_layout"),
-        });
+    pub fn new(
+        device: &Device,
+        config: &SurfaceConfiguration,
+        queue: &Queue,
+        camera_bind_group_layout: &BindGroupLayout) -> Self
+        {
         let camera_buffer = device.create_buffer_init(
             &wgpu::util::BufferInitDescriptor {
                 label: Some("Camera Buffer"),
@@ -41,7 +31,7 @@ impl Camera {
         let mut camera = Camera {
             // position the camera 1 unit up and 2 units back
             // +z is out of the screen
-            eye: (-1.0, 2.0, 0.0).into(),
+            eye: (0.0, 0.0, 2.0).into(),
             // have it look at the origin
             target: (0.0, 0.0, 0.0).into(),
             // which way is "up"
@@ -68,7 +58,7 @@ impl Camera {
         queue.write_buffer(&camera.camera_buffer, 0, bytemuck::cast_slice(&[camera.camera_uniform]));
         return camera;
     }
-    pub fn build_view_projection_matrix(&mut self) -> Mat4 {
+    pub fn build_view_projection_matrix(&mut self) {
         
         let view = Mat4::look_at_rh(self.eye, self.target, self.up);
         
@@ -80,7 +70,5 @@ impl Camera {
             self.zfar
         );
         self.camera_uniform = proj * view;
-        // 3.
-        return proj * view;
     }
 }
