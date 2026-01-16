@@ -1,6 +1,6 @@
-use glam::{Vec3,Mat4};
+use glam::{Mat4, Vec3, Vec4};
 use wgpu::{BindGroupLayout, Device, Queue, SurfaceConfiguration, util::DeviceExt};
-
+use crate::advanced_rendering::camera;
 pub struct Camera {
     pub eye: Vec3,
     pub target: Vec3,
@@ -12,8 +12,21 @@ pub struct Camera {
 
     pub camera_buffer: wgpu::Buffer,
     pub camera_bind_group: wgpu::BindGroup,
-    pub camera_uniform: Mat4,
+    pub camera_uniform: CameraUniform,
 }
+#[repr(C)]
+#[derive(Debug,bytemuck::Pod,Copy,Clone,bytemuck::Zeroable)]
+pub struct CameraUniform {
+    pub pos: Vec4,
+    pub matrix: Mat4,
+}
+impl CameraUniform {
+    pub fn update_view_proj(&mut self, camera: &camera::Camera, projection: &camera::Projection) {
+        self.pos = camera.position.to_homogeneous().into();
+        self.matrix = (projection.calc_matrix() * camera.calc_matrix()).into();
+    }
+}
+
 impl Camera {
     pub fn new(
         device: &Device,
@@ -24,14 +37,14 @@ impl Camera {
         let camera_buffer = device.create_buffer_init(
             &wgpu::util::BufferInitDescriptor {
                 label: Some("Camera Buffer"),
-                contents: bytemuck::cast_slice(&[Mat4::IDENTITY]),
+                contents: bytemuck::cast_slice(&[CameraUniform {pos: Vec4::default(), matrix: Mat4::default()}]),
                 usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
             }
         );
         let mut camera = Camera {
             // position the camera 1 unit up and 2 units back
             // +z is out of the screen
-            eye: (0.0, 0.0, 2.0).into(),
+            eye: (0.0, 8.0, -16.0).into(),
             // have it look at the origin
             target: (0.0, 0.0, 0.0).into(),
             // which way is "up"
@@ -40,7 +53,7 @@ impl Camera {
             fovy: 45.0,
             znear: 0.1,
             zfar: 1000.0,
-            camera_uniform: Mat4::default(),
+            camera_uniform: CameraUniform {pos:Vec4::default(),matrix:Mat4::default()},
             // camera_bind_group_layout,
             camera_bind_group: device.create_bind_group(&wgpu::BindGroupDescriptor {
                 layout: &camera_bind_group_layout,
@@ -69,6 +82,6 @@ impl Camera {
             self.znear,
             self.zfar
         );
-        self.camera_uniform = proj * view;
+        self.camera_uniform = CameraUniform {pos:Vec4::from((self.eye,0.0)), matrix:proj * view};
     }
 }

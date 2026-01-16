@@ -9,8 +9,6 @@ use crate::voxels::chunk_cache::ChunkCacheManager;
 use crate::v3::{length, loose_less, loose_more_eq};
 use crate::voxels::world_file::FileManager;
 use crate::entities::player::{PlayerEntity};
-
-static mut thing: bool = false;
 pub struct WorldManager {
     chunk_manager: ChunkCacheManager,
     file_manager: FileManager,
@@ -91,13 +89,6 @@ impl WorldManager {
                         //     mesh.vertices[i].pos[2],
                         // );
                         println!("{}",mesh.vertices[i].to_vec3());
-                    }
-                    // println!("-----------------");
-                    unsafe {
-                        if thing {
-                            process::exit(0);
-                        }
-                        thing = true;
                     }
                     self.chunk_manager.render_chunk(index,state);
                 }

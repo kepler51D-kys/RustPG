@@ -1,18 +1,26 @@
 [package]
-name = "RustPG"
-version = "0.1.0"
-edition = "2024"
+    name = "RustPG"
+    version = "0.1.0"
+    edition = "2024"
 
 [dependencies]
-glam = { version = "0.30.9", features = ["bytemuck"] }
-anyhow = "1.0"
-winit = { version = "0.30", features = ["android-native-activity"] }
-env_logger = "0.10"
-log = "0.4"
-wgpu = "27.0.0"
-pollster = "0.3"
-bytemuck = "1.24.0"
+    glam = { version = "0.30.10", features = ["bytemuck"] }
+    anyhow = "1.0"
+    winit = { version = "0.30", features = ["android-native-activity"] }
+    env_logger = "0.11.8"
+    log = "0.4"
+    wgpu = "27.0.0"
+    pollster = "0.4.0"
+    bytemuck = "1.24.0"
+    tobj = { version = "4.0.3", default-features = false, features = ["async"]}
+    fs_extra = "1.2"
+    glob = "0.3"
+instant = "0.1.13"
 [dependencies.image]
-version = "0.24"
-default-features = false
-features = ["png", "jpeg"]
+    version = "0.25.9"
+    default-features = false
+    features = ["png", "jpeg"]
+[build-dependencies]
+    anyhow = "1.0"
+    fs_extra = "1.2"
+    glob = "0.3"
