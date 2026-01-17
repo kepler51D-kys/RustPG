@@ -16,6 +16,7 @@
     fs_extra = "1.2"
     glob = "0.3"
 instant = "0.1.13"
+half = "2.7.1"
 [dependencies.image]
     version = "0.25.9"
     default-features = false

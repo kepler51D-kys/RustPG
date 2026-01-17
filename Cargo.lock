@@ -12,6 +12,7 @@ dependencies = [
  "fs_extra",
  "glam",
  "glob",
+ "half",
  "image",
  "instant",
  "log",

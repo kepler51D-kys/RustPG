@@ -1,74 +1,40 @@
-use glam::Vec3;
+const WORLD_SIZE: usize = 65536;
+pub const MAX_TREE_DEPTH: usize = 64;
 
-#[derive(Clone, Copy)]
+pub fn get_distance_index(x:u32,y:u32,z:u32) -> usize {
+    (x & 63) as usize * WORLD_SIZE * WORLD_SIZE +
+    (y & 63) as usize * WORLD_SIZE +
+    (z & 63) as usize
+}
+
+#[repr(u16)]
+#[derive(Clone, Copy,Debug)]
 pub enum BlockID {
     Air,Stone,Dirt,CobbleStone
 }
-pub const MAX_TREE_DEPTH: u32 = 64;
-pub struct OctNode {
-    pub block: BlockID,
-    pub children: [u32; 8],
-    pub is_leaf: bool,
-}
-impl OctNode {
-    pub fn new_leaf(block : BlockID) -> OctNode {
-        Self {
-            block,
-            children: [0;8],
-            is_leaf: true,
-        }
-    }
-}
-const BOUNDS: [Vec3;8] = [
-    Vec3::from_array([0.5,0.5,0.5]),
-    Vec3::from_array([0.5,0.5,0.0]),
-    Vec3::from_array([0.5,0.0,0.5]),
-    Vec3::from_array([0.5,0.0,0.0]),
 
-    Vec3::from_array([0.0,0.5,0.5]),
-    Vec3::from_array([0.0,0.5,0.0]),
-    Vec3::from_array([0.0,0.0,0.5]),
-    Vec3::from_array([0.0,0.0,0.0]),
-];
-fn get_offset(index: u32) -> Vec3 {
-    BOUNDS[(7-index) as usize]
-}
-fn get_bound(index: u32) -> Vec3 {
-    BOUNDS[index as usize]
-}
+// size of the Node, in terms of the area it covers, can be calculated by MAX_TREE_DEPTH / current depth.
+pub struct OctNode {
+    pub parent: u32, // address of parent
+    pub children: u32, // address of first child: if zero, then its a leaf
+    pub block_type: BlockID,
+    pub pos: usize, // reference distance to surface at 8 points of cube
+} // if size to large, change dist to f16
 
 pub struct OctTree {
-    pub children: Vec<[u32;8]>,
-    pub is_leaf: Vec<bool>,
-    pub blocks: Vec<BlockID>,
+    pub nodes: Vec<OctNode>,
 }
 impl OctTree {
-    pub fn new() -> Self {
-        Self {
-            children: Vec::new(),
-            is_leaf: Vec::new(),
-            blocks: Vec::new(),
-        }
+    pub fn new_node(&mut self, parent: u32, block: BlockID, pos: usize) {
+        self.nodes.push(OctNode {
+            block_type: block,
+            parent,
+            children: 0,
+            pos,
+        });
     }
-    pub fn add_node(&mut self, node: OctNode) {
-        self.children.push(node.children);
-        self.is_leaf.push(node.is_leaf);
-        self.blocks.push(node.block);
-    }
-    pub fn get_node(&self, index: usize) -> OctNode {
-        OctNode {
-            block: self.blocks[index],
-            children: self.children[index],
-            is_leaf: self.is_leaf[index],
-        }
-    }
-    pub fn split_node(&mut self, index: usize, blocks: [BlockID;8]) {
-        self.is_leaf[index] = false;
-        let addr: usize = self.children.len();
-        for i in 0..8 {
-            self.children[index][i] = (addr+i) as u32;
-            self.blocks[addr+i] = blocks[i];
-            self.is_leaf[addr+i] = false;
-        }
-    }
+}
+pub struct MapData { // per chunk
+    pub oct_tree: OctTree,
+    pub distance: [f32; MAX_TREE_DEPTH*MAX_TREE_DEPTH*MAX_TREE_DEPTH],
 }
