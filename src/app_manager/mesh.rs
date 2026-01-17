@@ -1,8 +1,5 @@
-use std::ops::{Add, AddAssign, Sub, SubAssign};
-use std::io::{BufReader, Cursor, Read};
-use glam::{Mat4, Vec2, Vec3};
 use wgpu::{Device, util::DeviceExt};
-use crate::{advanced_rendering::{render_vertex::Vertex, texture::Texture}, app_manager::app::IndicesSize};
+use crate::{advanced_rendering::{render_vertex::Vertex}, app_manager::app::IndicesSize};
 
 pub async fn load_string(file_name: &str) -> anyhow::Result<String> {
     let txt = {

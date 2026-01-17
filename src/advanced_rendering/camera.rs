@@ -1,8 +1,4 @@
-use glam::{Mat4,Vec3,Vec4};
-use winit::event::*;
-use winit::dpi::PhysicalPosition;
-use instant::Duration;
-use std::f32::consts::FRAC_PI_2;
+use glam::{Mat4,Vec3};
 
 #[derive(Debug)]
 pub struct Camera {

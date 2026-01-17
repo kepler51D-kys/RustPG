@@ -1,6 +1,6 @@
 use glam::{Vec2};
-use image::{ImageBuffer, Rgba, load_from_memory};
-use wgpu::{BindGroupLayout, Device, Queue, Sampler, TextureView};
+use image::{ImageBuffer, Rgba};
+use wgpu::{BindGroupLayout, Device, Queue};
 use image::GenericImageView;
 use anyhow::*;
 

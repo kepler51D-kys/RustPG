@@ -1,9 +1,9 @@
-use std::ops::{Add, AddAssign, Range, Sub, SubAssign};
-use std::io::{BufReader, Cursor, Read};
-use glam::{Mat4, Vec2, Vec3};
-use wgpu::{Device, util::DeviceExt};
+use std::ops::{Range};
+use std::io::{BufReader, Cursor};
+use glam::{Vec2, Vec3};
+use wgpu::{util::DeviceExt};
 use crate::app_manager::mesh::load_string;
-use crate::{advanced_rendering::{render_vertex::Vertex, texture::Texture}, app_manager::app::IndicesSize};
+use crate::{advanced_rendering::{render_vertex::Vertex, texture::Texture}};
 
 pub struct Material {
     pub name: String,

@@ -1,11 +1,10 @@
 use glam::Vec3;
-use wgpu::naga::Block;
 
 #[derive(Clone, Copy)]
 pub enum BlockID {
     Air,Stone,Dirt,CobbleStone
 }
-pub const CHUNKSIZE: u32 = 64;
+pub const MAX_TREE_DEPTH: u32 = 64;
 pub struct OctNode {
     pub block: BlockID,
     pub children: [u32; 8],
@@ -71,6 +70,5 @@ impl OctTree {
             self.blocks[addr+i] = blocks[i];
             self.is_leaf[addr+i] = false;
         }
-        
     }
 }

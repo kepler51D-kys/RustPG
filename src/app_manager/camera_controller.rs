@@ -4,7 +4,7 @@ use winit::dpi::PhysicalPosition;
 use instant::Duration;
 use winit::keyboard::KeyCode;
 use std::f32::consts::FRAC_PI_2;
-use crate::advanced_rendering::camera::{Camera, Projection};
+use crate::advanced_rendering::camera::{Camera};
 
 #[derive(Debug)]
 pub struct CameraController {

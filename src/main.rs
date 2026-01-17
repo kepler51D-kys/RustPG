@@ -1,5 +1,4 @@
 #![allow(dead_code)]
-#![allow(unused_imports)]
 mod advanced_rendering;
 mod app_manager;
 // mod entities;
