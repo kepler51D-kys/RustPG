@@ -18,14 +18,18 @@ pub struct OctNode {
     pub parent: u32, // address of parent
     pub children: u32, // address of first child: if zero, then its a leaf
     pub block_type: BlockID,
-    pub pos: usize, // reference distance to surface at 8 points of cube
+    pub pos: [[[f32; 2]; 2]; 2], // distance to surface at 8 points of cube
 } // if size to large, change dist to f16
 
 pub struct OctTree {
     pub nodes: Vec<OctNode>,
+    // pub pos: Vec<usize>,
+    // pub parents: Vec<u32>,
+    // pub children: Vec<u32>,
+    // pub block_type: Vec<BlockID>,
 }
 impl OctTree {
-    pub fn new_node(&mut self, parent: u32, block: BlockID, pos: usize) {
+    pub fn new_node(&mut self, parent: u32, block: BlockID, pos: [[[f32; 2]; 2]; 2]) {
         self.nodes.push(OctNode {
             block_type: block,
             parent,
@@ -36,5 +40,4 @@ impl OctTree {
 }
 pub struct MapData { // per chunk
     pub oct_tree: OctTree,
-    pub distance: [f32; MAX_TREE_DEPTH*MAX_TREE_DEPTH*MAX_TREE_DEPTH],
 }
