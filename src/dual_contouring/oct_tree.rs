@@ -16,10 +16,10 @@ pub enum BlockID {
 // size of the Node, in terms of the area it covers, can be calculated by MAX_TREE_DEPTH / current depth.
 pub struct OctNode {
     pub parent: u32, // address of parent
-    pub children: u32, // address of first child: if zero, then its a leaf
+    pub children: u32, // address of first child: if value is zero, then its a leaf
     pub block_type: BlockID,
-    pub pos: [[[f32; 2]; 2]; 2], // distance to surface at 8 points of cube
-} // if size to large, change dist to f16
+    pub dist: [[[f32; 2]; 2]; 2], // distance to surface at 8 points of cube
+} // if size is too large, change dist to f16
 
 pub struct OctTree {
     pub nodes: Vec<OctNode>,
@@ -29,13 +29,20 @@ pub struct OctTree {
     // pub block_type: Vec<BlockID>,
 }
 impl OctTree {
-    pub fn new_node(&mut self, parent: u32, block: BlockID, pos: [[[f32; 2]; 2]; 2]) {
+    pub fn new_node(&mut self, parent: u32, block_type: BlockID, pos: [[[f32; 2]; 2]; 2]) {
         self.nodes.push(OctNode {
-            block_type: block,
+            block_type,
             parent,
             children: 0,
             pos,
         });
+    }
+    pub fn render_test(&self) {
+        let mut pos_list: Vec<u32> = Vec::new();
+        pos_list.push(0);
+        while true {
+            let node: OctNode = self.nodes(pos_list[-1])
+        }
     }
 }
 pub struct MapData { // per chunk
