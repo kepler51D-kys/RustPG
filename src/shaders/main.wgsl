@@ -12,6 +12,13 @@ struct Light {
 @group(2) @binding(0)
 var<uniform> light: Light;
 
+struct VertexInput {
+    @location(0) position: vec3<f32>,
+    @location(1) texture_coords: vec2<f32>,
+    @location(2) normal: vec3<f32>,
+    @location(3) tangent: vec3<f32>,
+    @location(4) bitangent: vec3<f32>,
+};
 struct InstanceInput {
     @location(5) model_matrix_0: vec4<f32>,
     @location(6) model_matrix_1: vec4<f32>,
@@ -21,13 +28,6 @@ struct InstanceInput {
     @location(9) normal_matrix_0: vec3<f32>,
     @location(10) normal_matrix_1: vec3<f32>,
     @location(11) normal_matrix_2: vec3<f32>,
-};
-struct VertexInput {
-    @location(0) position: vec3<f32>,
-    @location(1) texture_coords: vec2<f32>,
-    @location(2) normal: vec3<f32>,
-    @location(3) tangent: vec3<f32>,
-    @location(4) bitangent: vec3<f32>,
 };
 struct VertexOutput {
     @builtin(position) clip_position: vec4<f32>,
@@ -71,9 +71,7 @@ fn vs_main(
     out.tangent_light_position = tangent_matrix * light.position;
     return out;
 }
-
-
-
+// ---------------------------------------------------------------------------------------------------------
 // fragment shader
 @group(1) @binding(0)
 var t_diffuse: texture_2d<f32>;
@@ -104,6 +102,5 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let specular_color = specular_strength * light.color;
 
     let result = (ambient_color + diffuse_color + specular_color) * object_color.xyz;
-
     return vec4<f32>(result, object_color.a);
 }

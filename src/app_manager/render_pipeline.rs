@@ -10,6 +10,7 @@ pub fn create_render_pipeline(
 
     device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
         label: Some("Render Pipeline"),
+        multiview_mask: None,
         layout: Some(layout),
         vertex: wgpu::VertexState {
             module: &shader,
@@ -54,7 +55,6 @@ pub fn create_render_pipeline(
             mask: !0,
             alpha_to_coverage_enabled: false,
         },
-        multiview: None,
         cache: None,
     })
 }

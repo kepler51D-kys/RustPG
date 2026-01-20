@@ -182,7 +182,7 @@ impl State {
         });
         let camera = camera::Camera::new((0.0, 5.0, 10.0), -90.0*PI/180.0, -20.0*PI/180.0);
         let projection = camera::Projection::new(config.width, config.height, 45.0*PI/180.0, 0.1, 100.0);
-        let camera_controller = CameraController::new(4.0, 0.4);
+        let camera_controller = CameraController::new(4.0, 15.0);
         let mut camera_uniform: CameraUniform = CameraUniform {
             pos: Vec4::default(),
             matrix: Mat4::default(),
@@ -211,8 +211,9 @@ impl State {
             let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Light Pipeline Layout"),
                 bind_group_layouts: &[&camera_bind_group_layout, &light_bind_group_layout],
-                // immediate_size: 0,
-                push_constant_ranges: &[],
+                immediate_size: 0,
+                // push_constant_ranges: &[],
+
             });
             let shader = wgpu::ShaderModuleDescriptor {
                 label: Some("Light Shader"),
@@ -240,7 +241,8 @@ impl State {
                     &texture_bind_group_layout,
                     &light_bind_group_layout,
                 ],
-                push_constant_ranges: &[],
+                immediate_size: 0,
+                // push_constant_ranges: &[],
             });
         let render_pipeline = create_render_pipeline(
             &device,
@@ -281,6 +283,9 @@ impl State {
 
         let depth_texture = Texture::create_depth_texture(&device, &config, "depth_texture");
         surface.configure(&device, &config);
+        let _ = window.set_cursor_grab(winit::window::CursorGrabMode::Locked);
+        window.set_cursor_visible(false);
+
         Ok(Self {
             camera_buffer,
             camera_bind_group,
@@ -397,6 +402,7 @@ impl State {
                 }),
                 timestamp_writes: None,
                 occlusion_query_set: None,
+                multiview_mask: None,
             });
             
             

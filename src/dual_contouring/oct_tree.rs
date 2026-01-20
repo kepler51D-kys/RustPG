@@ -1,3 +1,5 @@
+use crate::advanced_rendering::model::{Mesh, Model};
+
 const WORLD_SIZE: usize = 65536;
 pub const MAX_TREE_DEPTH: usize = 64;
 
@@ -25,29 +27,31 @@ pub struct OctNode {
 } // if size is too large, change dist to f16
 
 pub struct OctTree {
-    pub nodes: Vec<OctNode>,
-    // pub pos: Vec<usize>,
-    // pub parents: Vec<u32>,
-    // pub children: Vec<u32>,
-    // pub block_type: Vec<BlockID>,
+    pub mesh_cache: Mesh,
+    pub distances: Vec<[[[f32; 2]; 2]; 2]>,
+    pub parents: Vec<u32>,
+    pub children: Vec<u32>,
+    pub block_type: Vec<BlockID>,
 }
 impl OctTree {
     pub fn new_node(&mut self, parent: u32, block_type: BlockID, dist: [[[f32; 2]; 2]; 2]) {
-        self.nodes.push(OctNode {
-            block_type,
-            parent,
-            children: 0,
-            dist,
-        });
+        self.distances.push(dist);
+        self.parents.push(parent);
+        self.block_type.push(block_type);
+        self.children.push(0);
     }
-    pub fn render_test(&self) {
-        let mut pos_list: Vec<u32> = Vec::new();
-        pos_list.push(0);
-        // while true {
-        //     let node: OctNode = self.nodes[pos_list[-1])
-        // }
+    pub fn get_node(&self, index: usize) -> OctNode {
+        OctNode {
+            parent: self.parents[index],
+            children: self.children[index],
+            dist: self.distances[index],
+            block_type: self.block_type[index],
+        }
     }
-}
-pub struct MapData { // per chunk
-    pub oct_tree: OctTree,
+    pub fn is_leaf(&self, index: usize) -> bool {
+        self.children[index] == 0
+    }
+    pub fn make_mesh(&self) {
+
+    }
 }

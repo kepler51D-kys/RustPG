@@ -1,4 +1,4 @@
-#![allow(dead_code)]
+// #![allow(dead_code)]
 mod advanced_rendering;
 mod app_manager;
 mod compute_shaders;
@@ -16,9 +16,8 @@ pub fn run() -> anyhow::Result<()> {
     let event_loop = EventLoop::with_user_event().build()?;
     let mut app = App::new();
     event_loop.run_app(&mut app)?;
-
     Ok(())
 }
 fn main() {
-    let _ = run();
+    let thingy = run().unwrap();
 }
