@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 mod advanced_rendering;
 mod app_manager;
+mod compute_shaders;
 // mod entities;
 // mod voxels;
 mod dual_contouring;
