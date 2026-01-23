@@ -17,7 +17,7 @@ impl App {
     pub fn new() -> Self {
         Self {
             state: None,
-            last_render_time: instant::Instant::now(), 
+            last_render_time: instant::Instant::now(),
         }
     }
 }
