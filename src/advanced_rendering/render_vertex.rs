@@ -11,33 +11,15 @@ pub struct Vertex {
     pub bitangent: Vec3,
 }
 impl Vertex {
-    pub const fn new() -> Self {
-        Self {
-            pos: Vec3::ZERO,
-            normal: Vec3::ZERO,
-            texture_coords: Vec2::ZERO,
-            tangent: Vec3::ZERO,
-            bitangent: Vec3::ZERO,
-        }
-    }
-    pub const fn new_pos(pos: Vec3) -> Self {
-        Self {
-            pos,
-            normal: Vec3::ZERO,
-            texture_coords: Vec2::ZERO,
-            tangent: Vec3::ZERO,
-            bitangent: Vec3::ZERO,
-        }
-    }
-    pub const fn new_full(pos: Vec3,normal: Vec3, texture_coords: Vec2) -> Self {
-        Self {
-            pos,
-            normal,
-            texture_coords,
-            tangent: Vec3::ZERO,
-            bitangent: Vec3::ZERO,
-        }
-    }
+    // pub const fn new() -> Self {
+    //     Self {
+    //         pos: Vec3::ZERO,
+    //         normal: Vec3::ZERO,
+    //         texture_coords: Vec2::ZERO,
+    //         tangent: Vec3::ZERO,
+    //         bitangent: Vec3::ZERO,
+    //     }
+    // }
     
     pub fn desc() -> wgpu::VertexBufferLayout<'static> {
         wgpu::VertexBufferLayout {

@@ -1,5 +1,4 @@
 use std::{f32::consts::PI, sync::Arc};
-
 use glam::{Mat4, Quat, Vec3, Vec4};
 use wgpu::{RenderPipeline, util::DeviceExt};
 use crate::{advanced_rendering::{instance::{Instance,InstanceRaw}, lighting::LightUniform, model::{DrawModel, Model}}, app_manager::{camera::CameraUniform, camera_controller::{CameraController}, render_pipeline::create_render_pipeline}};
@@ -8,6 +7,9 @@ use winit::{
 };
 use crate::advanced_rendering::camera;
 use crate::advanced_rendering::{render_vertex::Vertex,texture::Texture};
+
+const CAMERA_ROTATION_SPEED: f32 = 30.0;
+
 pub struct State {
     instances: Vec<Instance>,
     instance_buffer: wgpu::Buffer,
@@ -182,7 +184,7 @@ impl State {
         });
         let camera = camera::Camera::new((0.0, 5.0, 10.0), -90.0*PI/180.0, -20.0*PI/180.0);
         let projection = camera::Projection::new(config.width, config.height, 45.0*PI/180.0, 0.1, 100.0);
-        let camera_controller = CameraController::new(4.0, 15.0);
+        let camera_controller = CameraController::new(4.0, CAMERA_ROTATION_SPEED);
         let mut camera_uniform: CameraUniform = CameraUniform {
             pos: Vec4::default(),
             matrix: Mat4::default(),

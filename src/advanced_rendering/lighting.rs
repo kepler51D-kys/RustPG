@@ -2,7 +2,7 @@ use std::ops::Range;
 
 use glam::Vec3;
 
-use crate::advanced_rendering::{model::{Mesh, Model}, render_vertex::Vertex};
+use crate::advanced_rendering::{model::{Mesh, Model}};
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
@@ -13,24 +13,24 @@ pub struct LightUniform {
     pub _padding1: u32,
 }
 impl LightUniform {
-    pub fn new(dat: Vertex) -> Self {
-        Self {
-            _padding0: 0,
-            _padding1: 0,
-            pos: dat.pos,
-            col: Vec3::new(dat.texture_coords.x,dat.texture_coords.y,0.0),
-        }
-    }
+    // pub fn new(dat: Vertex) -> Self {
+    //     Self {
+    //         _padding0: 0,
+    //         _padding1: 0,
+    //         pos: dat.pos,
+    //         col: Vec3::new(dat.texture_coords.x,dat.texture_coords.y,0.0),
+    //     }
+    // }
 }
 
 // model.rs
 pub trait DrawLight<'a> {
-    fn draw_light_mesh(
-        &mut self,
-        mesh: &'a Mesh,
-        camera_bind_group: &'a wgpu::BindGroup,
-        light_bind_group: &'a wgpu::BindGroup,
-    );
+    // fn draw_light_mesh(
+    //     &mut self,
+    //     mesh: &'a Mesh,
+    //     camera_bind_group: &'a wgpu::BindGroup,
+    //     light_bind_group: &'a wgpu::BindGroup,
+    // );
     fn draw_light_mesh_instanced(
         &mut self,
         mesh: &'a Mesh,
@@ -58,14 +58,14 @@ impl<'a, 'b> DrawLight<'b> for wgpu::RenderPass<'a>
 where
     'b: 'a,
 {
-    fn draw_light_mesh(
-        &mut self,
-        mesh: &'b Mesh,
-        camera_bind_group: &'b wgpu::BindGroup,
-        light_bind_group: &'b wgpu::BindGroup,
-    ) {
-        self.draw_light_mesh_instanced(mesh, 0..1, camera_bind_group, light_bind_group);
-    }
+    // fn draw_light_mesh(
+    //     &mut self,
+    //     mesh: &'b Mesh,
+    //     camera_bind_group: &'b wgpu::BindGroup,
+    //     light_bind_group: &'b wgpu::BindGroup,
+    // ) {
+    //     self.draw_light_mesh_instanced(mesh, 0..1, camera_bind_group, light_bind_group);
+    // }
 
     fn draw_light_mesh_instanced(
         &mut self,

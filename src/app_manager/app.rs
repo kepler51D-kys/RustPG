@@ -1,10 +1,9 @@
 use std::sync::Arc;
 
 
-pub type IndicesSize = u16;
 use instant::Instant;
 use winit::{
-    application::ApplicationHandler, dpi::LogicalPosition, event::{DeviceEvent, Event, KeyEvent, WindowEvent}, event_loop::ActiveEventLoop, keyboard::PhysicalKey, window::Window
+    application::ApplicationHandler, event::{DeviceEvent, KeyEvent, WindowEvent}, event_loop::ActiveEventLoop, keyboard::PhysicalKey, window::Window
 };
 
 use crate::app_manager::state::State;
@@ -38,8 +37,8 @@ impl ApplicationHandler<State> for App {
     }
     fn device_event(
             &mut self,
-            event_loop: &ActiveEventLoop,
-            device_id: winit::event::DeviceId,
+            _event_loop: &ActiveEventLoop,
+            _device_id: winit::event::DeviceId,
             event: DeviceEvent,
         ) {
         let current_state = match &mut self.state {
@@ -52,7 +51,7 @@ impl ApplicationHandler<State> for App {
             }
             _ => {}
         }
-        let _ = current_state.window.set_cursor_position(LogicalPosition::new(100.0f32,100.0f32));
+        // let _ = current_state.window.set_cursor_position(LogicalPosition::new(100.0f32,100.0f32));
     }
     fn window_event(
         &mut self,
