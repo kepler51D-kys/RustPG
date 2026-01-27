@@ -1,14 +1,16 @@
 use std::sync::Arc;
 
 
+use glam::Vec3;
 use instant::Instant;
 use winit::{
     application::ApplicationHandler, event::{DeviceEvent, KeyEvent, WindowEvent}, event_loop::ActiveEventLoop, keyboard::PhysicalKey, window::Window
 };
 
-use crate::app_manager::state::State;
+use crate::{app_manager::state::State, dual_contouring::world::RenderManager};
 
 pub struct App {
+    pub render_manager: RenderManager,
     pub state: Option<State>,
     pub last_render_time: Instant,
 }
@@ -16,6 +18,7 @@ pub struct App {
 impl App {
     pub fn new() -> Self {
         Self {
+            render_manager: RenderManager::new(Vec3::ZERO, 10),
             state: None,
             last_render_time: instant::Instant::now(),
         }

@@ -5,10 +5,10 @@ use std::{fs::{File, OpenOptions}, io::{Read, Seek, SeekFrom}};
 const MAX_WORLD_SIZE: usize = 1_048_576;
 
 use crate::dual_contouring::oct_tree::OctTree;
-pub struct OctTreeStore {
-    pub len: u32,
-    pub distances: &[[[[f32; 2]; 2]; 2]],
-}
+// pub struct OctTreeStore {
+//     pub len: u32,
+//     pub distances: [[[f32; 2]; 2]; 2]>,
+// }
 pub struct WorldFileManager {
     // pub chunk_generator: todo!()
     filename: String,
@@ -26,9 +26,9 @@ impl WorldFileManager {
     }
     pub fn retrieve_chunk(&mut self, index: UVec3) -> OctTree {
         let file_index = self.get_index(index);
-        self.chunk_file.seek(SeekFrom::Start(file_index));
+        self.chunk_file.seek(SeekFrom::Start(file_index)).unwrap();
         let mut buf = vec![0; 4];
-        self.chunk_file.read_exact(&mut buf);
+        self.chunk_file.read_exact(&mut buf).unwrap();
 
         todo!()
     }

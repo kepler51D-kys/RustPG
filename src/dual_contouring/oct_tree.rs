@@ -19,7 +19,7 @@ pub enum BlockID {
 
 // size of the Node, in terms of the area it covers, can be calculated by MAX_TREE_DEPTH / current depth.
 pub struct OctNode {
-    pub parent: u32, // address of parent
+    // pub parent: u32, // address of parent
     pub children: u32, // address of first child: if value is zero, then its a leaf
     pub dist: [[[f32; 2]; 2]; 2], // distance to surface at 8 points of cube
     pub block_type: BlockID,
@@ -28,7 +28,7 @@ pub struct OctNode {
 pub struct OctTree {
     pub mesh_cache: Mesh,
     pub distances: Vec<[[[f32; 2]; 2]; 2]>,
-    pub parents: Vec<u32>,
+    // pub parents: Vec<u32>,
     pub children: Vec<u32>,
     pub block_type: Vec<BlockID>,
 }
@@ -37,13 +37,13 @@ impl OctTree {
     
     pub fn new_node(&mut self, parent: u32, block_type: BlockID, dist: [[[f32; 2]; 2]; 2]) {
         self.distances.push(dist);
-        self.parents.push(parent);
+        // self.parents.push(parent);
         self.block_type.push(block_type);
         self.children.push(0);
     }
     pub fn get_node(&self, index: usize) -> OctNode {
         OctNode {
-            parent: self.parents[index],
+            // parent: self.parents[index],
             children: self.children[index],
             dist: self.distances[index],
             block_type: self.block_type[index],
@@ -53,11 +53,11 @@ impl OctTree {
         self.distances[index] = node.dist;
         self.block_type[index] = node.block_type;
         self.children[index] = node.children;
-        self.parents[index] = node.parent;
+        // self.parents[index] = node.parent;
     }
     pub fn del_node(&mut self,index: usize) {
         self.distances.remove(index);
-        self.parents.remove(index);
+        // self.parents.remove(index);
         self.block_type.remove(index);
         self.children.remove(index);
     }
@@ -76,7 +76,19 @@ impl OctTree {
             true
         }
     }
-    pub fn make_mesh(&self) {
+    pub fn make_mesh(&self, depth: u32) {
+        let mut stack: Vec<usize> = Vec::with_capacity(depth as usize);
+        stack.push(0);
+        while stack.len() > 0 {
+            if self.children[stack[stack.len()-1]] != 0 {
+                // has children
+            }
+            else {
+                // is leaf
 
+                // do whatever
+                stack.pop();
+            }
+        }
     }
 }
